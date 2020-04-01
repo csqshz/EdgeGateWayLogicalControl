@@ -1,0 +1,61 @@
+/local/1000/1000/command
+
+/local/1000/1100/command
+//平台下发启动风机命令
+{
+    "deviceKey": "1300",
+    "cmd": "write",
+    "function": {
+        "SF-ENA": "true"
+    },
+    "sno": "12345"
+}
+
+{
+    "deviceKey": "1000",
+    "cmd": "delDevice",
+    "channel": "virDev",
+    "data": {
+		"virDevType": "AHU",
+		"deviceKey":"1400",
+	},
+    "sno": "1234"
+}
+
+/local/1000/1100/command
+//平台下发改变季节 1：冬季，2：夏季，3：过渡季
+{
+    "deviceKey" : "1300",
+    "cmd":"write",
+    "function" :{
+        "WS-EX":"3",
+    },
+    "sno": "12345"
+}
+
+/local/1000/1118
+//风机run state
+{
+    "deviceKey": "1318",
+    "function": {
+        "channel18-value": "1"
+    }
+}
+
+//回风湿度
+{
+    "deviceKey": "1301",
+    "function": {
+        "channel2-value": "50"
+    }
+}
+
+//回风湿度
+{
+    "deviceKey": "1302",
+    "function": {
+        "channel1-value": "10.2"
+    }
+}
+
+

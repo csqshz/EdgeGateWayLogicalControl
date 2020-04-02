@@ -888,10 +888,6 @@ void MqttCmdMessProc(char *message)
 
     cmd = json_object_get_string(jCmdVal);
 
-    int deviceKey;
-    deviceKey = GetIntValByKey(jRoot, "deviceKey");
-    ES_PRT_INFO("Rcv json message, DeviceKey = %d, cmd = %s \n", deviceKey, cmd);
-
     /* 上层下发配置点位 */
     if(strcmp(cmd, "addDevice") == 0){
         //TODO: 判断"virDevType":"AHU"，否则返回

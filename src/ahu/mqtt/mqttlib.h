@@ -18,8 +18,8 @@
 #define ES_MQTT_PORT		(1883)
 #define ES_MQTT_KEEPALIVE	(60)
 
-#define MQTT_SUB_GW				"/local/1000/1000/command"
-#define MQTT_PUBTOPIC_PREFIX	"/local/1000"
+#define MQTT_SUB_GW				"/local/gateway/1000/command"
+#define MQTT_PUBTOPIC_PREFIX	"/local/gateway"
 
 /* end */
 

@@ -75,6 +75,6 @@ void MqttCmdMessProc(char *message);
 void SendCmd2Low(char *name, AppAirCondDev_t *Dev, enum CmdOper oper, char *template);
 int deviceKey2deviceID(int deviceKey);
 int GetIntValByKey(struct json_object *jRoot, char *key);
-int SaveTime2Local(unsigned int deviceID, unsigned int RunTime);
+int UpdateVal2Local(unsigned int deviceID, char *name);
 
 #endif //__PROC_H__

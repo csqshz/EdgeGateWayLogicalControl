@@ -474,11 +474,13 @@ void *AirCondCtrlRt_thread(void *arg)
 
             if(QueryIntValFromAirCondList(SF_S, &node->AirCondDev) == 0){
                 node->AirCondDev.RunTime = 0;
-            }else if(QueryIntValFromAirCondList(SF_S, &node->AirCondDev) != 0){
+            }else if(QueryIntValFromAirCondList(SF_S, &node->AirCondDev) != 0
+                    && QueryIntValFromAirCondList(SF_C, &node->AirCondDev) == 1){
                 node->AirCondDev.RunTime += 1;
             }
-            //TODO:send to other app
-            SaveTime2Local(node->AirCondDev.deviceID, node->AirCondDev.RunTime);
+            //TODO:send to other app//
+//            SETVAL2LIST(VSD_RT, node->AirCondDev.RunTime, TypeOfVal_INT, &node->AirCondDev);
+            UpdateVal2Local(node->AirCondDev.deviceID, "VSD-RT");
             pthread_mutex_unlock(&node->AirCondDev.lock);
         }
         /* 每秒1s一次，不考虑cpu高负载造成的延时 */

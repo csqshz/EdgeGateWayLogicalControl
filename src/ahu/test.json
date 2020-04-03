@@ -1,6 +1,6 @@
-/local/1000/1000/command
+/local/gareway/1000/command
 
-/local/1000/1100/command
+/local/gareway/1100/command
 //平台下发启动风机命令
 {
     "deviceKey": "1300",
@@ -22,7 +22,7 @@
     "sno": "1234"
 }
 
-/local/1000/1100/command
+/local/gareway/1100/command
 //平台下发改变季节 1：冬季，2：夏季，3：过渡季
 {
     "deviceKey" : "1300",
@@ -33,7 +33,7 @@
     "sno": "12345"
 }
 
-/local/1000/1118
+/local/gareway/1118
 //风机run state
 {
     "deviceKey": "1318",

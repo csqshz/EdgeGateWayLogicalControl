@@ -56,8 +56,8 @@
 #define COMPLETED	(1)
 #define UNCOMPLETED	(0)
 
-#define NORMAL	(0)
-#define ALARM	(1)
+#define NORMAL	(false)
+#define ALARM	(true)
 
 #define VLV_C_MIN	(0)		// 阀最小开度
 #define VLV_C_MAX	(100)	// 阀最大开度

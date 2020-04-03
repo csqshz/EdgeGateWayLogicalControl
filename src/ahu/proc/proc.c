@@ -143,20 +143,51 @@ int GetIntValByKey(struct json_object *jRoot, char *key)
 
 
 /* 设置空调的虚点PointProp_t，虚点的function等价于name */
-void SetVirPointProp(PointProp_t *prop, char *virName, const char *valStr, enum TypeOfVal type, int deviceKey)
+int SetVirPointProp(PointProp_t *prop, char *virName, struct json_object *valVir, enum TypeOfVal type, int deviceKey)
 {
+    json_type jtype;
+    jtype = json_object_get_type(valVir);
+        switch(jtype){
+            case json_type_boolean: 
+                if(type == TypeOfVal_BOOL){
+                    prop->Val.valB = json_object_get_boolean(valVir);
+                    prop->tag = type;
+                }else{
+                    ES_PRT_INFO("Inconsistent type \n");
+                    return -1;
+                }
+                break;
+            case json_type_int: 
+                /* 两次判断数据类型 */
+                if(type == TypeOfVal_INT){
+                    prop->Val.valI = json_object_get_int(valVir);
+                    prop->tag = type;
+                }else{
+                    ES_PRT_INFO("Inconsistent type \n");
+                    return -1;
+                }
+                break;
+            case json_type_double:
+                if(type == TypeOfVal_DOUBLE){
+                    prop->Val.valD = json_object_get_double(valVir);
+                    prop->tag = type;
+                }else{
+                    ES_PRT_INFO("Inconsistent type \n");
+                    return -1;
+                }
+                break;
+
+            case json_type_string: break;
+            default: break;
+
+    };
+
     strcpy(prop->name, virName);
     strcpy(prop->func, virName);
-    prop->tag = type;
+    
     prop->deviceKey = deviceKey;
 
-    if(type == TypeOfVal_INT){
-        prop->Val.valI = atoi(valStr);
-
-    }else if(type == TypeOfVal_DOUBLE){
-        prop->Val.valD = atof(valStr);
-    }
-
+    return 0;
 }
 /* 设置空调的实点PointProp_t，实点的val字段此处不用 */
 void SetRealPointProp(PointProp_t *prop, char *RealName, const char *deviceKey, const char *MapKey, enum TypeOfVal type)
@@ -189,8 +220,7 @@ void InitPointProp(PointProp_t *dest, PointProp_t *src, int start, int end)
  */
 void ExtractVirPoint(struct json_object *jVirPoint, int deviceKey, AppAirCondDev_t *Device)
 {
-    json_type type;
-
+    json_type jtype;
     /* get 虚点的个数，申请相应内存 */
     Device->lenVir = json_object_object_length(jVirPoint);
     Device->PointProp = calloc(Device->lenVir, sizeof(PointProp_t));
@@ -201,61 +231,45 @@ void ExtractVirPoint(struct json_object *jVirPoint, int deviceKey, AppAirCondDev
     int i = 0;
     /* 遍历虚点，提取value+deviceKey */
     json_object_object_foreach(jVirPoint,keyVir,valVir){
+        jtype = json_object_get_type(valVir);
 
-        type = json_object_get_type(valVir);
-        switch(type){
-            case json_type_string:
-                /* value不为空 */
-                if(strcmp(json_object_get_string(valVir), "") != 0){
-                    // 风机整机启停
-                    if(strcmp(keyVir, SF_ENA) == 0){
-                        strcpy((Device->PointProp+i)->name, keyVir);
-                        strcpy((Device->PointProp+i)->func, keyVir);
-                        (Device->PointProp+i)->deviceKey = deviceKey;
-                        (Device->PointProp+i)->tag = TypeOfVal_INT;
-                        /* SF_ENA命令在添加设备时默认时false */
-                        (Device->PointProp+i)->Val.valI = 0;
-                        /*
-                        if(strcmp(json_object_get_string(valVir), "false") == 0){
-                            (Device->PointProp+i)->Val.valI = 0;
-                        }else{
-                            (Device->PointProp+i)->Val.valI = 1;
-                        }
-                        */
-                    // 房间温度预设
-                    }else if(strcmp(keyVir, RM_TSP) == 0){
-                        SetVirPointProp(Device->PointProp+i, keyVir, json_object_get_string(valVir), TypeOfVal_DOUBLE, deviceKey);
-                    // 房间湿度预设
-                    }else if(strcmp(keyVir, RM_HSP) == 0 ){
-                        SetVirPointProp(Device->PointProp+i, keyVir, json_object_get_string(valVir), TypeOfVal_DOUBLE, deviceKey);
-                    // 冬夏季转换
-                    }else if(strcmp(keyVir, WS_EX) == 0 ){
-                        SetVirPointProp(Device->PointProp+i, keyVir, json_object_get_string(valVir), TypeOfVal_INT, deviceKey);
-                    // 房间二氧化碳浓度预设
-                    }else if(strcmp(keyVir, RM_CO2SP) == 0 ){
-                        SetVirPointProp(Device->PointProp+i, keyVir, json_object_get_string(valVir), TypeOfVal_INT, deviceKey);
-                    // 新风阀初始开度预设
-                    }else if(strcmp(keyVir, OAD_MIN) == 0 ){
-                        SetVirPointProp(Device->PointProp+i, keyVir, json_object_get_string(valVir), TypeOfVal_DOUBLE, deviceKey);
-                    // 回风阀初始开度预设
-                    }else if(strcmp(keyVir, RA_MIN) == 0 ){
-                        SetVirPointProp(Device->PointProp+i, keyVir, json_object_get_string(valVir), TypeOfVal_DOUBLE, deviceKey);
-                    // 水阀初始开度预设
-                    }else if(strcmp(keyVir, VLV_MIN) == 0 ){
-                        SetVirPointProp(Device->PointProp+i, keyVir, json_object_get_string(valVir), TypeOfVal_DOUBLE, deviceKey);
-                    // 风机运行时间的value不为空，说明是从本地文件加载的，设备已经运行了.
-                    }else if(strcmp(keyVir, VSD_RT) == 0 ){
-                        Device->RunTime = (unsigned int)atoi(json_object_get_string(valVir));
-                    }
+        /* null类型的json对象不处理 */
+        if(jtype == json_type_null){
+            continue;
+        }
 
-                /* VSD-RT(风机运行时间) 的value为空, 说明是新加设备,  */ 
-                }else if(strcmp(keyVir, VSD_RT) == 0){
-                    
-                    SetVirPointProp(Device->PointProp+i, VSD_RT, "0", TypeOfVal_INT, deviceKey);
-                    
-                }
-                break;
-            default: break;
+        /* 累计虚点个数 */ 
+        Device->lenVir++;
+        Device->PointProp = realloc(Device->PointProp, sizeof(PointProp_t) * Device->lenVir);
+
+        // 风机整机启停
+        if( strcmp(keyVir, SF_ENA) == 0 ){
+            SetVirPointProp(Device->PointProp+i, keyVir, valVir, TypeOfVal_BOOL, deviceKey);
+        // 房间温度预设
+        }else if( strcmp(keyVir, RM_TSP) == 0 ){
+            SetVirPointProp(Device->PointProp+i, keyVir, valVir, TypeOfVal_DOUBLE, deviceKey);
+        // 房间湿度预设
+        }else if( strcmp(keyVir, RM_HSP) == 0 ){
+            SetVirPointProp(Device->PointProp+i, keyVir, valVir, TypeOfVal_DOUBLE, deviceKey);
+        // 冬夏季转换
+        }else if( strcmp(keyVir, WS_EX) == 0 ){
+            SetVirPointProp(Device->PointProp+i, keyVir, valVir, TypeOfVal_INT, deviceKey);
+        // 房间二氧化碳浓度预设
+        }else if( strcmp(keyVir, RM_CO2SP) == 0 ){
+            SetVirPointProp(Device->PointProp+i, keyVir, valVir, TypeOfVal_INT, deviceKey);
+        // 新风阀初始开度预设
+        }else if( strcmp(keyVir, OAD_MIN) == 0 ){
+            SetVirPointProp(Device->PointProp+i, keyVir, valVir, TypeOfVal_DOUBLE, deviceKey);
+        // 回风阀初始开度预设
+        }else if( strcmp(keyVir, RA_MIN) == 0 ){
+            SetVirPointProp(Device->PointProp+i, keyVir, valVir, TypeOfVal_DOUBLE, deviceKey);
+        // 水阀初始开度预设
+        }else if( strcmp(keyVir, VLV_MIN) == 0 ){
+            SetVirPointProp(Device->PointProp+i, keyVir, valVir, TypeOfVal_DOUBLE, deviceKey);
+        // 风机运行时间
+        }else if(strcmp(keyVir, VSD_RT) == 0 ){
+            SetVirPointProp(Device->PointProp+i, keyVir, valVir, TypeOfVal_INT, deviceKey);
+            Device->RunTime = json_object_get_int(valVir);
         }
 
         if(i < Device->lenVir){
@@ -559,7 +573,7 @@ void AddDevFromLocal()
 }
 
 /* @brief: 将RunTime转化成json对象，写进文件file中 */
-void _SaveTime2Local(unsigned int RunTime, char *file)
+void _UpdateVal2Local(char *name, char *file)
 {
     COMBINEFULLFILENAME(file, FileFullName);
 
@@ -580,11 +594,12 @@ void _SaveTime2Local(unsigned int RunTime, char *file)
     json_object_put(jRoot);
 }
 
-/* @brief: 将风机累计运行时间保存到本地json文件，替换"VSD-RT"对象 
- * @deviceID: 设备id，也是虚点的ID
+/* @brief: 根据deviceID找到文件，将链表中的点位值更新到本地json文件
+ * @deviceID: 要更新的设备id，也是虚点的ID
+ * @name: 要更新的点位名字
  * @return: sucess-0
  */
-int SaveTime2Local(unsigned int deviceID, unsigned int RunTime)
+int UpdateVal2Local(unsigned int deviceID, char *name)
 {
     char dIDStr[20];
     sprintf(dIDStr, "%d", deviceID);
@@ -599,7 +614,7 @@ int SaveTime2Local(unsigned int deviceID, unsigned int RunTime)
             continue;
         }
         if( strstr(ent->d_name, dIDStr) ){
-            _SaveTime2Local(RunTime, ent->d_name);
+            _UpdateVal2Local(name, ent->d_name);
             break;
         }
     }
@@ -620,59 +635,54 @@ int SaveTime2Local(unsigned int deviceID, unsigned int RunTime)
 void _UpdatePoints(struct json_object *jPoints, AppAirCondDev_t *Dev, int deviceKey)
 {
     int i;
-    json_type type;
 
     json_object_object_foreach(jPoints,key,jVal){
 
-        type = json_object_get_type(jVal);
-        switch(type){
-            case json_type_string:
+        for(i=0; i<Dev->len; i++){
 
-                for(i=0; i<Dev->len; i++){
+            if((Dev->PointProp+i)->deviceKey != deviceKey){
+                continue;
+            }
 
-                    if((Dev->PointProp+i)->deviceKey != deviceKey){
-                        continue;
+            if(strcmp(key, (Dev->PointProp+i)->func) == 0){
+                ES_PRT_INFO("Updating points: name = %s, function = %s, val = %s \n", \
+                            (Dev->PointProp+i)->name, key, \
+                            json_object_to_json_string_ext(jVal, JSON_C_TO_STRING_PRETTY));
+
+                /* 风机使能，此点的value不是数字型单独算 */
+                if(strcmp(key, SF_ENA) == 0){
+                    if( json_object_get_boolean(jVal) == false ){
+                        Dev->runcmd = STOP;
+                    }else{
+                        Dev->runcmd = START;
                     }
-
-                    if(strcmp(key, (Dev->PointProp+i)->func) == 0){
-                        ES_PRT_INFO("Updating points: name = %s, function = %s, val = %s \n", \
-                                    (Dev->PointProp+i)->name, key, \
-                                    json_object_to_json_string_ext(jVal, JSON_C_TO_STRING_PRETTY));
-
-                        /* 风机使能，此点的value不是数字型单独算 */
-                        if(strcmp(key, SF_ENA) == 0){
-                            if(strcmp(json_object_get_string(jVal), "false") == 0){
-                                Dev->runcmd = STOP;
-                            }else{
-                                Dev->runcmd = START;
-                            }
-                        /* 冬夏季需要额外更新标志位，所以也要单独处理 */
-                        }else if(strcmp(key, WS_EX) == 0){
-                            if((Dev->PointProp+i)->Val.valI != atoi(json_object_get_string(jVal))){
-                                Dev->WSChanged = CHANGED;
-                            }
-                            (Dev->PointProp+i)->Val.valI = atoi(json_object_get_string(jVal));
-
-                        /* 报警解除 */
-                        }else if(strcmp((Dev->PointProp+i)->name, FR_PR) == 0){
-                            /* 由报警->解除报警 */
-                            if((Dev->PointProp+i)->Val.valI == ALARM && atoi(json_object_get_string(jVal)) == NORMAL){
-                                Dev->ReleaseAlarm = 1;
-                            }
-                            (Dev->PointProp+i)->Val.valI = atoi(json_object_get_string(jVal));
-                        
-                        /* 其他点位 */
-                        }else if((Dev->PointProp+i)->tag == TypeOfVal_INT){
-                            (Dev->PointProp+i)->Val.valI = atoi(json_object_get_string(jVal));
-                        
-                        }else if((Dev->PointProp+i)->tag == TypeOfVal_DOUBLE){
-                            (Dev->PointProp+i)->Val.valD = atof(json_object_get_string(jVal));
-                        }
-
+                /* 冬夏季需要额外更新标志位，所以也要单独处理 */
+                }else if(strcmp(key, WS_EX) == 0){
+                    if((Dev->PointProp+i)->Val.valI != json_object_get_int(jVal)){
+                        Dev->WSChanged = CHANGED;
                     }
+                    (Dev->PointProp+i)->Val.valI = json_object_get_int(jVal);
+
+                /* 报警解除 */
+                }else if(strcmp((Dev->PointProp+i)->name, FR_PR) == 0){
+                    /* 由报警->解除报警 */
+                    if((Dev->PointProp+i)->Val.valB == ALARM && json_object_get_boolean(jVal) == NORMAL){
+                        Dev->ReleaseAlarm = 1;
+                    }
+                    (Dev->PointProp+i)->Val.valB = json_object_get_boolean(jVal);
+                
+                /* 其他点位 */
+                }else if((Dev->PointProp+i)->tag == TypeOfVal_INT){
+                    (Dev->PointProp+i)->Val.valI = json_object_get_int(jVal);
+                
+                }else if((Dev->PointProp+i)->tag == TypeOfVal_DOUBLE){
+                    (Dev->PointProp+i)->Val.valD = json_object_get_int(jVal);
+
+                }else if((Dev->PointProp+i)->tag == TypeOfVal_BOOL){
+                    (Dev->PointProp+i)->Val.valB = json_object_get_boolean(jVal);
                 }
-                break;
-            default: break;
+
+            }
         }
     }
 

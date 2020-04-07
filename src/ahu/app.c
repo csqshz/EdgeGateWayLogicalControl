@@ -456,7 +456,7 @@ void *AirCondCtrlCo2_thread(void *arg)
             pthread_mutex_lock(&node->AirCondDev.lock);
             pthread_mutex_unlock(&node->AirCondDev.lock);
         }
-
+ 
         usleep(1000*100);
     }
     return NULL;
@@ -466,6 +466,7 @@ void *AirCondCtrlCo2_thread(void *arg)
 void *AirCondCtrlRt_thread(void *arg)
 {
     AppAirCondDev_l *node;
+    struct json_object *jRoot;
 #if 1
     while(1){
         /* 遍历每一个设备 */
@@ -474,13 +475,16 @@ void *AirCondCtrlRt_thread(void *arg)
 
             if(QueryIntValFromAirCondList(SF_S, &node->AirCondDev) == 0){
                 node->AirCondDev.RunTime = 0;
+            /* 风机处于工作状态才开始计时 */
             }else if(QueryIntValFromAirCondList(SF_S, &node->AirCondDev) != 0
                     && QueryIntValFromAirCondList(SF_C, &node->AirCondDev) == 1){
                 node->AirCondDev.RunTime += 1;
             }
             //TODO:send to other app//
-//            SETVAL2LIST(VSD_RT, node->AirCondDev.RunTime, TypeOfVal_INT, &node->AirCondDev);
-            UpdateVal2Local(node->AirCondDev.deviceID, "VSD-RT");
+            SETVAL2LIST(VSD_RT, node->AirCondDev.RunTime, TypeOfVal_INT, &node->AirCondDev);
+            jRoot = RestructJsonTempl1(&node->AirCondDev, "VSD-RT");
+            UpdateVirPoints2Local(jRoot);
+            json_object_put(jRoot);
             pthread_mutex_unlock(&node->AirCondDev.lock);
         }
         /* 每秒1s一次，不考虑cpu高负载造成的延时 */

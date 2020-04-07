@@ -27,11 +27,11 @@ void SubMqttByDeviceKey(AppAirCondDev_t *Dev)
 	char topic_ack[100];
 	char topic_cmd[100];
 
-	/* 订阅虚点相关："local/{gatewaydeviceKey}/{虚点deviceKey}/command" */
+	/* 订阅虚点相关："local/{gateway}/{虚点deviceKey}/command" */
 	sprintf(topic_cmd, "%s/%d/command", MQTT_PUBTOPIC_PREFIX, Dev->deviceID);
 	mosquitto_subscribe(MqttAirCond, NULL, topic_cmd, 0);
 
-	/* 订阅实点相关，实点都是设备返回的值 "local/{gatewaydeviceKey}/{实点deviceKey}" */
+	/* 订阅实点相关，实点都是设备返回的值 "local/{gateway}/{实点deviceKey}" */
 	for(i=Dev->lenVir; i<Dev->len; i++){
 		sprintf(topic_ack, "%s/%u", MQTT_PUBTOPIC_PREFIX, (Dev->PointProp+i)->deviceKey);
 //		ES_PRT_DEBUG("name = %s, deviceKey = %u \n", (Dev->PointProp+i)->name, (Dev->PointProp+i)->deviceKey);
@@ -72,10 +72,10 @@ void AirCondLogCb(struct mosquitto *mosq, void *userdata, int level, const char 
 void AirCondMessCb(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *message)
 {
 //	ES_PRT_DEBUG("message->topic = %s \n", (char *)message->topic);
-//	ES_PRT_DEBUG("message->payload = %s \n", (char *)message->payload);
+	ES_PRT_DEBUG("message->payload = %s \n", (char *)message->payload);
 
 	if(strstr((char *)message->topic, "command") != NULL){
-    	MqttCmdMessProc((char *)message->payload);
+    	MqttCmdMessProc((char *)message->payload, (char *)message->topic);
 	}else{
 		MqttMessProc((char *)message->payload);
 	}

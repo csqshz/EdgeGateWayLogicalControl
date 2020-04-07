@@ -88,7 +88,13 @@ enum TypeOfVal{
 	TypeOfVal_BOOL,
 	TypeOfVal_INT,
 	TypeOfVal_CHAR,
+	TypeOfVal_STRING,
 	TypeOfVal_DOUBLE
+};
+
+enum ErrorCode{
+	ErrCodeSucc = 0,
+	ErrCodeFalse
 };
 
 typedef union _DataType_u{
@@ -96,6 +102,7 @@ typedef union _DataType_u{
 	int 		valI;
 	char		valC;
 	double		valD;
+	char		valStr[20];
 }DataType_u;
 
 typedef struct _PointProp_t{

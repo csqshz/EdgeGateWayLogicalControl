@@ -71,10 +71,12 @@
 void AddDevFromLocal();
 void ExtractPoints(AppAirCondDev_t *, struct json_object *);
 void MqttMessProc(char *message);
-void MqttCmdMessProc(char *message);
+void MqttCmdMessProc(char *message, char *topic);
 void SendCmd2Low(char *name, AppAirCondDev_t *Dev, enum CmdOper oper, char *template);
 int deviceKey2deviceID(int deviceKey);
 int GetIntValByKey(struct json_object *jRoot, char *key);
 int UpdateVal2Local(unsigned int deviceID, char *name);
+struct json_object *RestructJsonTempl1(AppAirCondDev_t *Dev, char *PointName);
+void UpdateVirPoints2Local(struct json_object *jRoot);
 
 #endif //__PROC_H__

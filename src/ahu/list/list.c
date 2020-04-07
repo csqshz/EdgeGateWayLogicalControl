@@ -171,11 +171,11 @@ void SetVal2AirCondList(char *name, AppAirCondDev_t *Dev, DataType_u val)
 
             if((Dev->PointProp+i)->tag == TypeOfVal_INT){
                 (Dev->PointProp+i)->Val.valI = val.valI;
-                ES_PRT_INFO("Set val to list(deviceID = %d) > %s: %d \n", Dev->deviceID, name, (Dev->PointProp+i)->Val.valI);
+//                ES_PRT_INFO("Set val to list(deviceID = %d) > %s: %d \n", Dev->deviceID, name, (Dev->PointProp+i)->Val.valI);
 
             }else if((Dev->PointProp+i)->tag == TypeOfVal_DOUBLE){
                 (Dev->PointProp+i)->Val.valD = val.valD;
-                ES_PRT_INFO("Set val to list(deviceID = %d) > %s: %lf \n", Dev->deviceID, name, (Dev->PointProp+i)->Val.valD);
+//                ES_PRT_INFO("Set val to list(deviceID = %d) > %s: %lf \n", Dev->deviceID, name, (Dev->PointProp+i)->Val.valD);
             }
         }
     }

@@ -3,20 +3,14 @@
   "channel":"virDev",
   "cmd":"addDevice",
   "data":{
-    "deviceKey":"1300",
+    "deviceKey":"1400",
     "sn":"",
     "alias":"",
     "function":{
       "RM-TSP":22.1,
-      "RM-HSP":40.2,
-      "RM-CO2SP":2,
-      "OAD-MIN":10.3,
-      "RA-MIN":10.4,
-      "VLV-MIN":10.5,
       "WS-EX":1,
-      "virpointKey":"3",
       "SF-ENA":false,
-      "VSD-RT":9
+      "VSD-RT":0
     },
     "extraInfo":{
       "type":"module"
@@ -24,61 +18,61 @@
     "configuration":{
       "virDevType":"AHU",
       "RA-T":{
-        "deviceKey":"1301",
+        "deviceKey":"1401",
         "jsonMap":{
           "key":"channel1-value"
         }
       },
       "RA-H":{
-        "deviceKey":"1302",
+        "deviceKey":"1402",
         "jsonMap":{
           "key":"channel2-value"
         }
       },
       "SA-T":{
-        "deviceKey":"1303",
+        "deviceKey":"1403",
         "jsonMap":{
           "key":"channel3-value"
         }
       },
       "SA-H":{
-        "deviceKey":"1304",
+        "deviceKey":"1404",
         "jsonMap":{
           "key":"channel4-value"
         }
       },
       "RM-CO2":{
-        "deviceKey":"1305",
+        "deviceKey":"1405",
         "jsonMap":{
           "key":"channel5-value"
         }
       },
       "VLV-FB":{
-        "deviceKey":"1306",
+        "deviceKey":"1406",
         "jsonMap":{
           "key":"channel6-value"
         }
       },
       "RAD-FB":{
-        "deviceKey":"1307",
+        "deviceKey":"1407",
         "jsonMap":{
           "key":"channel7-value"
         }
       },
       "OAD-FB":{
-        "deviceKey":"1308",
+        "deviceKey":"1408",
         "jsonMap":{
           "key":"channel8-value"
         }
       },
       "VLV-C":{
-        "deviceKey":"1309",
+        "deviceKey":"1409",
         "jsonMap":{
           "key":"channel9-value"
         }
       },
       "HUM-TC":{
-        "deviceKey":"1310",
+        "deviceKey":"1410",
         "jsonMap":{
           "key":"channel10-value"
         }
@@ -96,67 +90,67 @@
         }
       },
       "RAD-TC":{
-        "deviceKey":"1313",
+        "deviceKey":"1413",
         "jsonMap":{
           "key":"channel13-value"
         }
       },
       "OAD-TC":{
-        "deviceKey":"1314",
+        "deviceKey":"1414",
         "jsonMap":{
           "key":"channel14-value"
         }
       },
       "SF-F":{
-        "deviceKey":"1315",
+        "deviceKey":"1415",
         "jsonMap":{
           "key":"channel15-value"
         }
       },
       "SF-AM":{
-        "deviceKey":"1316",
+        "deviceKey":"1416",
         "jsonMap":{
           "key":"channel16-value"
         }
       },
       "SF-DP":{
-        "deviceKey":"1317",
+        "deviceKey":"1417",
         "jsonMap":{
           "key":"channel17-value"
         }
       },
       "SF-S":{
-        "deviceKey":"1318",
+        "deviceKey":"1418",
         "jsonMap":{
           "key":"channel18-value"
         }
       },
       "FR-PR":{
-        "deviceKey":"1319",
+        "deviceKey":"1419",
         "jsonMap":{
           "key":"channel19-value"
         }
       },
       "FILT-S":{
-        "deviceKey":"1320",
+        "deviceKey":"1420",
         "jsonMap":{
           "key":"channel20-value"
         }
       },
       "FFILT-S":{
-        "deviceKey":"1321",
+        "deviceKey":"1421",
         "jsonMap":{
           "key":"channel21-value"
         }
       },
       "OAD-S":{
-        "deviceKey":"1322",
+        "deviceKey":"1422",
         "jsonMap":{
           "key":"channel22-value"
         }
       },
       "RAD-S":{
-        "deviceKey":"1323",
+        "deviceKey":"1423",
         "jsonMap":{
           "key":"channel23-value"
         }
@@ -168,7 +162,7 @@
         }
       },
       "SF-C":{
-        "deviceKey":"1325",
+        "deviceKey":"1425",
         "jsonMap":{
           "key":"channel25-value"
         }

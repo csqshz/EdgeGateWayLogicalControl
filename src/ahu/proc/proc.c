@@ -31,7 +31,50 @@ extern PointProp_t ppinit;
 */
 char *AirApp2Low = "{\"deviceKey\":\"011\",\"cmd\":\"write\",\"function\":{\"realpoint_key\":\"1\"}}";
 
-/* end */
+/* Template 1 */
+char *AirAppTempl1 = "{\"deviceKey\":\"1300\",\"function\":{\"virpointKey\":\"3\"}}";
+
+/* @brief: 根据点位名字，重构Template1
+ * @PointName：点位名字
+ */
+struct json_object * RestructJsonTempl1(AppAirCondDev_t *Dev, char *PointName)
+{
+    int i;
+    /* 从设备点位集中找到点位 */
+    for(i=0; i<Dev->len; i++){
+        if(strcmp((Dev->PointProp+i)->name, PointName) == 0){
+            break;
+        }
+    }
+
+    struct json_object *jTempl1 = json_tokener_parse(AirAppTempl1);
+
+    /* 更换deviceKey */
+    char dKeyStr[20];
+    sprintf(dKeyStr, "%u", (Dev->PointProp+i)->deviceKey);
+    struct json_object* jdKeyStr = json_object_new_string(dKeyStr);
+    json_object_object_del(jTempl1, "deviceKey");
+    json_object_object_add(jTempl1, "deviceKey", jdKeyStr);
+
+    /* 更换function中的虚点*/
+    struct json_object *jVal;
+    if((Dev->PointProp+i)->tag == TypeOfVal_INT){
+        jVal = json_object_new_int((Dev->PointProp+i)->Val.valI);
+    }else if((Dev->PointProp+i)->tag == TypeOfVal_DOUBLE){
+        jVal = json_object_new_double((Dev->PointProp+i)->Val.valD);
+    }else if((Dev->PointProp+i)->tag == TypeOfVal_STRING){
+        jVal = json_object_new_string((Dev->PointProp+i)->Val.valStr);
+    }else if((Dev->PointProp+i)->tag == TypeOfVal_BOOL){
+        jVal = json_object_new_boolean((Dev->PointProp+i)->Val.valB);
+    }
+
+    struct json_object *jFuncVal;
+    json_object_object_get_ex(jTempl1, "function", &jFuncVal);
+    json_object_object_del(jFuncVal, "virpointKey");
+    json_object_object_add(jFuncVal, PointName, jVal);
+
+    return jTempl1;
+}
 
 /* 根据template，将prop內部成员的值替换template中对应的成员。 
  * 替换的内容有：deviceKey，cmd，function
@@ -85,7 +128,13 @@ struct json_object *CombineJson2Low(PointProp_t *prop, enum CmdOper oper, char *
     json_object_object_add(jfunc, prop->func, json_object_new_string(realpointVal));
 
     return jObj;
-    
+}
+
+void AddErrCode2Json(struct json_object *jRoot, enum ErrorCode ErrCode)
+{
+    struct json_object *jErrCode;
+    jErrCode = json_object_new_int(ErrCode);
+    json_object_object_add(jRoot, "errorCode", jErrCode);
 }
 
 /* 通过mqtt publish向下层发送报文。 
@@ -534,6 +583,7 @@ void _AddDevFromLocal(char *dir, char *file)
 
     AddDevFromJson(jRoot);
     /* 将报文再发给/local/app/bacnet/command */
+    AddErrCode2Json(jRoot, ErrCodeSucc);
     ES_PRT_INFO("Sending new device to bacnet/104... \n");
     const char *message = json_object_to_json_string_ext(jRoot, JSON_C_TO_STRING_PRETTY);
     mosquitto_publish(MqttAirCond, NULL, "/local/app/bacnet/command", strlen(message), message, 0, 0);
@@ -570,63 +620,6 @@ void AddDevFromLocal()
     }else{
         ES_PRT_WARN("Local Json conf dir: %s is unexist \n", LOCAL_CONF_DIR);
     }
-}
-
-/* @brief: 将RunTime转化成json对象，写进文件file中 */
-void _UpdateVal2Local(char *name, char *file)
-{
-    COMBINEFULLFILENAME(file, FileFullName);
-
-    char RTStr[40];
-    sprintf(RTStr, "%d", RunTime);
-
-    json_object *jRunTime = json_object_new_string(RTStr);
-
-    json_object *jRoot = json_object_from_file(FileFullName);
-    json_object *jData = json_object_object_get(jRoot, "data");
-    json_object *jFunc = json_object_object_get(jData, "function");
-
-    json_object_object_del(jFunc, "VSD-RT");
-    json_object_object_add(jFunc, "VSD-RT", jRunTime);
-
-    json_object_to_file_ext(FileFullName, jRoot, JSON_C_TO_STRING_PRETTY);
-
-    json_object_put(jRoot);
-}
-
-/* @brief: 根据deviceID找到文件，将链表中的点位值更新到本地json文件
- * @deviceID: 要更新的设备id，也是虚点的ID
- * @name: 要更新的点位名字
- * @return: sucess-0
- */
-int UpdateVal2Local(unsigned int deviceID, char *name)
-{
-    char dIDStr[20];
-    sprintf(dIDStr, "%d", deviceID);
-
-    DIR *dirp;
-    struct dirent *ent;
-
-    dirp = opendir(LOCAL_CONF_DIR);
-
-    while( (ent = readdir(dirp)) != NULL ){
-        if ( (strcmp(".", ent->d_name) == 0 ) || (strcmp("..", ent->d_name) == 0) ){
-            continue;
-        }
-        if( strstr(ent->d_name, dIDStr) ){
-            _UpdateVal2Local(name, ent->d_name);
-            break;
-        }
-    }
-
-    if(ent == NULL){
-        ES_PRT_ERROR("Can't find related local file with deviceID: %d, when saving time to local \n", deviceID);
-        closedir(dirp);
-        return -1;
-    }
-
-    closedir(dirp);
-    return 0;
 }
 
 /* @brief：将jNewVirPoint中包含的点位和实例Dev中的虚点的deviceKey和function一一对比
@@ -722,14 +715,12 @@ unsigned int UpdatePoints(struct json_object *jRoot)
 /* 将平台下发的新设备点位保存到本地 */
 void SaveDev2Local(struct json_object *jRoot)
 {
-    /* 网关的deviceKey */
-    int GwDeviceKey;
-    GwDeviceKey = GetIntValByKey(jRoot, "deviceKey");
-
     struct json_object *jData;
 
     /* get data object */
-    jData = json_object_object_get(jRoot, "data");
+    if(!json_object_object_get_ex(jRoot, "data", &jData)){
+        return;
+    }
 
     int VirDeviceKey, deviceID;
     /* 获取虚点的deviceKey，并作为当前实例的deviceID */
@@ -737,7 +728,7 @@ void SaveDev2Local(struct json_object *jRoot)
     deviceID = VirDeviceKey;
 
     char FileName[100];
-    sprintf(FileName, "%s_%d_%d.json", APPNAME, GwDeviceKey, deviceID);
+    sprintf(FileName, "%s_%u.json", APPNAME, deviceID);
 
     COMBINEFULLFILENAME(FileName, FileFullName);
 
@@ -771,7 +762,7 @@ void SaveDev2Local(struct json_object *jRoot)
     }
 }
 
-void _UpdatePoints2Local(char *file, struct json_object *jNew)
+void _UpdateVirPoints2Local(char *file, struct json_object *jNew)
 {
     COMBINEFULLFILENAME(file, FileFullName);
 
@@ -793,7 +784,7 @@ void _UpdatePoints2Local(char *file, struct json_object *jNew)
 }
 
 /* 将虚点的新value更新到本地 */
-void UpdatePoints2Local(struct json_object *jRoot)
+void UpdateVirPoints2Local(struct json_object *jRoot)
 {
     int deviceKey;
     deviceKey = GetIntValByKey(jRoot, "deviceKey");
@@ -812,7 +803,7 @@ void UpdatePoints2Local(struct json_object *jRoot)
         }
         /* 找到虚点所在的文件 */
         if(strstr(ent->d_name, deviceIDStr) != NULL){
-            _UpdatePoints2Local(ent->d_name, jRoot);
+            _UpdateVirPoints2Local(ent->d_name, jRoot);
         }
     }
 
@@ -882,64 +873,91 @@ void DelDevFromJson(struct json_object *jData)
 }
 
 /* 收到mqtt的message回调后，根据cmd字段分类处理 */
-void MqttCmdMessProc(char *message)
+void MqttCmdMessProc(char *message, char *topic)
 {
     const char *cmd;
-    struct json_object *jRoot, *jCmdVal;
+    struct json_object *jRoot, *jChan, *jCmdVal;
 
-    /* 1 string -> json */
+    /* string -> json */
     jRoot = json_tokener_parse(message);
 
-    /* 2 提取cmd字段 */
-    /* 不存在cmd字段的报文返回 */
+    /* 提取 channel 字段, 不是 "channel":"virDev" 的报文返回 */
+    if( json_object_object_get_ex(jRoot, "channel", &jChan) ){
+        if(strcmp(json_object_get_string(jChan), "virDev") != 0){
+            return;
+        }
+    }
+    
+    /* 提取 cmd 字段 cmd 字段的报文返回 */
     if( !json_object_object_get_ex(jRoot, "cmd", &jCmdVal) ){
         return;
     }
 
     cmd = json_object_get_string(jCmdVal);
+//ES_PRT_DEBUG("cmd = %s \n", cmd);
 
-    /* 上层下发配置点位 */
     if(strcmp(cmd, "addDevice") == 0){
-        //TODO: 判断"virDevType":"AHU"，否则返回
-        struct json_object *jData, *jvirDevType;
-        jData = json_object_object_get(jRoot, "data");
-        jvirDevType = json_object_object_get(jData, "virDevType");
+        struct json_object *jData, *jConfig, *jvirDevType;
+        if(!json_object_object_get_ex(jRoot, "data", &jData)){
+            return;
+        }
+        if(!json_object_object_get_ex(jData, "configuration", &jConfig)){
+            return;
+        }
+        if(!json_object_object_get_ex(jConfig, "virDevType", &jvirDevType)){
+            return;
+        }
         /* 不是AHU的报文不处理 */
-        if(strcmp("AHU", json_object_get_string(jvirDevType)) != 0){
+        if(strcmp(APPNAME, json_object_get_string(jvirDevType)) != 0){
             return;
         }
 
+        const char *mess;
         /* 添加空调实例, 成功返回0 */
         if(AddDevFromJson(jRoot) != -1){
             /* 新设备保存到本地 */
             SaveDev2Local(jRoot);
+
+            /* 加上errcode，将报文再发给/local/app/bacnet/command */
+            AddErrCode2Json(jRoot, ErrCodeSucc);
+            mess = json_object_to_json_string_ext(jRoot, JSON_C_TO_STRING_PRETTY);
+            ES_PRT_INFO("Send new device to /local/app/bacnet/command ... \n");
+            mosquitto_publish(MqttAirCond, NULL, "/local/app/bacnet/command", strlen(mess), mess, 0, 0);
         }
 
-        /* 将报文再发给/local/app/bacnet/command */
-        //TODO: add errno to json payload
-        ES_PRT_INFO("Send new device to /local/app/bacnet/command ... \n");
-        mosquitto_publish(MqttAirCond, NULL, "/local/app/bacnet/command", strlen(message), message, 0, 0);
 
     /* 2. 更新虚点的值 */
     }else if(strcmp(cmd, "write") == 0){
         if( UpdatePoints(jRoot) != -1 ){
-            UpdatePoints2Local(jRoot);
+            UpdateVirPoints2Local(jRoot);
 
-            // local/{gatewaydeviceKey}/{hvacdeviceKey}
+            AddErrCode2Json(jRoot, ErrCodeSucc);
             PublishWriteBack(jRoot);
         }
     }else if(strcmp(cmd, "delDevice") == 0){
         struct json_object *jData, *jvirDevType;
-        jData = json_object_object_get(jRoot, "data");
-        jvirDevType = json_object_object_get(jData, "virDevType");
+        char tpc[100];
+        const char *mess;
+
+        if(!json_object_object_get_ex(jRoot, "data", &jData)){
+            return;
+        }
+        if(!json_object_object_get_ex(jData, "virDevType", &jvirDevType)){
+            return;
+         }
         /* 不是AHU的报文不处理 */
         if(strcmp("AHU", json_object_get_string(jvirDevType)) != 0){
             return;
         }
 
         DelDevFromJson(jData);
-        //TODO: ack, add errno
+        //TODO: 增加返回值的判断，比如删除失败的种类
+        AddErrCode2Json(jRoot, ErrCodeSucc);
+        mess = json_object_to_json_string_ext(jRoot, JSON_C_TO_STRING_PRETTY);
 
+        /* 去掉topic尾部的command字段 */
+        strncpy(tpc, topic, strlen(topic)-strlen("command"));
+        mosquitto_publish(MqttAirCond, NULL, tpc, strlen(mess), mess, 0, 0);
     }
 
     json_object_put(jRoot);

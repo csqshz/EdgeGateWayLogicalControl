@@ -10,7 +10,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
-#include "data.h"
+#include "ahudata.h"
 
 #define ES_MQTT_HOST		"localhost"
 //#define ES_MQTT_HOST		"192.168.37.232"
@@ -36,7 +36,7 @@ void AirCondMessCb(struct mosquitto *mosq, void *userdata,
 void AirCondLogCb(struct mosquitto *mosq, void *userdata, 
 					int level, const char *str);
 
-void SubMqttByDeviceKey(AppAirCondDev_t *Dev);
+void SubMqttByDeviceKey(AppAHUDev_t *Dev);
 
 void PublishWriteBack(struct json_object *jRoot);
 

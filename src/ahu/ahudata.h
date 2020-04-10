@@ -1,17 +1,19 @@
-#ifndef _DATA_H_
-#define _DATA_H_
+#ifndef __AHUDATA_H__
+#define __AHUDATA_H__
 
 #include <stdio.h>
 #include <pthread.h>
 #include <stdbool.h>
 #include <assert.h>
 #include "ahupid.h"
+#include "data.h"
 
 /* BO */
 #define HUM_C 	"HUM-C"		// 开关型加湿阀
 #define RAD_C	"RAD-C"		// 回风阀开关
 #define SF_C	"SF-C"		// 风机启停命令
 #define OAD_C	"OAD-C"		// 室外新风阀开关
+#define VSD_C	"VSD-FB"	// 风机变频器命令
 /* BI */
 #define SF_F	"SF-F"		// 送风机故障
 #define SF_S	"SF-S"		// 送风机状态
@@ -22,6 +24,12 @@
 #define FFILT_S	"FFILT-S"	// 新风滤网压差报警
 #define OAD_S	"OAD-S"		// 开关型新风阀状态
 #define RAD_S	"RAD-S"		// 开关型新风阀状态
+#define SED_S	"SED-S"		// 静电除尘启停状态
+#define SED_F	"SED-F"		// 静电除尘故障
+#define SFILT_S	"SFILT-S"	// 中效滤网压差状态
+#define PFILT_S	"PFILT-S"	// 初效滤网压差状态
+#define VSD_S	"VSD-FB"	// 风机变频器状态
+#define VSD_F	"VSD-FB"	// 风机变频器故障
 /* AO */
 #define VLV_C	"VLV-C"		// 二通调节水阀
 #define HUM_TC	"HUM-TC"	// 调节型加湿阀
@@ -40,7 +48,12 @@
 #define RM_CO2	"RM-CO2"	// 室内二氧化碳含量
 #define RA_CO2	"RA-CO2"	// 回风二氧化碳含量
 #define SA_CO2	"SA-CO2"	// 送风二氧化碳含量
-/* 软点位 */
+#define FA_T	"FA-T"		// 新风温度
+#define FA_H	"FA-H"		// 新风湿度
+#define VSD_FB	"VSD-FB"	// 风机变频器频率反馈
+#define CV_FB	"CV-FB"		// 冷水调节阀反馈
+#define HV_FB	"HV-FB"		// 热水调节阀反馈
+/* 虚点位 */
 #define SF_ENA	"SF-ENA"	// 风机整机启动
 #define RM_TSP	"RM-TSP"	// 送风温度设定点
 #define RM_HSP	"RM-HSP"	// 送风湿度设定点
@@ -49,15 +62,9 @@
 #define OAD_MIN	"OAD-MIN"	// 新风阀初始开度设定
 #define RA_MIN	"RA-MIN"	// 回风阀初始开度设定
 #define VLV_MIN	"VLV-MIN"	// 水阀初始开度设定
-#define VSD_RT	"VSD-RT"	// 风机运行时间
-
-#define START	(1)
-#define STOP	(0)
-#define COMPLETED	(1)
-#define UNCOMPLETED	(0)
-
-#define NORMAL	(false)
-#define ALARM	(true)
+#define VSD_RT	"VSD-RT"	// 风机运行时间, VSD表示变频器，此处命名有误
+#define	VSD_MIN	"VSD-MIN"	// 变频器最小频率
+#define	VSD_MAX	"VSD-MAX"	// 变频器最大频率
 
 #define VLV_C_MIN	(0)		// 阀最小开度
 #define VLV_C_MAX	(100)	// 阀最大开度
@@ -67,58 +74,10 @@
 #define TEMP_PID_I	(300)	// 180-600
 #define TEMP_PID_D	(30)	// 18-60
 
-#define INVALID_DEVICEKEY	(0xffffffff)
-
-#define CHANGED	(1)
-
 #define APPNAME	"AHU"
 
-enum Season{
-	WINTER = 1,
-	SUMMER,
-	TRANSITION
-};
-
-enum CmdOper{
-	CMD_WRITE,
-	CMD_READ,
-};
-
-enum TypeOfVal{
-	TypeOfVal_BOOL,
-	TypeOfVal_INT,
-	TypeOfVal_CHAR,
-	TypeOfVal_STRING,
-	TypeOfVal_DOUBLE
-};
-
-enum ErrorCode{
-	ErrCodeSucc = 0,
-	ErrCodeFalse
-};
-
-typedef union _DataType_u{
-	bool		valB;
-	int 		valI;
-	char		valC;
-	double		valD;
-	char		valStr[20];
-}DataType_u;
-
-typedef struct _PointProp_t{
-	char			name[20];
-
-	// 决定Val的类型：enum TypeOfVal, 暂时没用到
-	enum TypeOfVal	tag;
-	DataType_u		Val;
-
-	unsigned int 	deviceKey;
-	char			func[30];
-
-}PointProp_t;
-
 /* App Device */
-typedef struct _AppAirCondDev_t{
+typedef struct _AppAHUDev_t{
 
 	pthread_mutex_t lock;
 
@@ -155,13 +114,14 @@ typedef struct _AppAirCondDev_t{
 		int GenerateAlarm;	// 报警生成标志, 1: 生成, 0:初始状态，
 	/* 标志位end */
 
-}AppAirCondDev_t;
+}AppAHUDev_t;
 
-typedef struct _AppAirCondDev_l{
+/* 空调暖通设备描述符 */
+typedef struct _AppAHUDev_l{
 	pthread_mutex_t lock;		// 此lock控制链表节点的增删改查，
-								// 而AppAirCondDev_t内的lock控制各自实例内部点位的查改
-	AppAirCondDev_t AirCondDev;
-	struct _AppAirCondDev_l *next;
-}AppAirCondDev_l;
+								// 而AppAHUDev_t内的lock控制各自实例内部点位的查改
+	AppAHUDev_t AHUDev;
+	struct _AppAHUDev_l *next;
+}AppAHUDev_l;
 
-#endif //_DATA_H_
+#endif //__AHUDATA_H__

@@ -1,31 +1,31 @@
-#include "list.h"
+#include "ahulist.h"
 #include "app.h"
 #include "es_print.h"
 #include "ahupid.h"
 
-AppAirCondDev_l *AirCondList_head = NULL;
+AppAHUDev_l *AirCondList_head = NULL;
 
 /* init list head */
-AppAirCondDev_l *InitAirCondListHead()
+AppAHUDev_l *InitAirCondListHead()
 {
-    AppAirCondDev_l *head = calloc(1, sizeof(AppAirCondDev_l));
+    AppAHUDev_l *head = calloc(1, sizeof(AppAHUDev_l));
     pthread_mutex_init(&head->lock, NULL);
 
     return head;
 }
 
 /* 新建一个实例, 新建的依据是参数deviceID */
-AppAirCondDev_l *NewAirCondDevNode(int deviceID) 
+AppAHUDev_l *NewAHUDevNode(int deviceID) 
 {
-    AppAirCondDev_l *node = calloc(1, sizeof(AppAirCondDev_l));
+    AppAHUDev_l *node = calloc(1, sizeof(AppAHUDev_l));
 
     pthread_mutex_init(&node->lock, NULL);
-    pthread_mutex_init(&node->AirCondDev.lock, NULL);
+    pthread_mutex_init(&node->AHUDev.lock, NULL);
 
-    node->AirCondDev.deviceID = deviceID;
+    node->AHUDev.deviceID = deviceID;
     
     /* 冬夏季转换标志初始值为CHANGED，这样过渡季的处理直接在温控线程做就行了 */
-    node->AirCondDev.WSChanged = CHANGED;
+    node->AHUDev.WSChanged = CHANGED;
 
     return node;
 }
@@ -33,12 +33,12 @@ AppAirCondDev_l *NewAirCondDevNode(int deviceID)
 /* 空调实例链表中是否存在deviceID这个实例
  * 存在返回1
  */
-bool IsExistInAirCondDevList(int deviceID)
+bool IsExistInAHUDevList(int deviceID)
 {
-    AppAirCondDev_l *temp = AirCondList_head;
+    AppAHUDev_l *temp = AirCondList_head;
 
     while(temp->next != NULL){
-        if(temp->next->AirCondDev.deviceID == deviceID){
+        if(temp->next->AHUDev.deviceID == deviceID){
             return 1;
         }
 
@@ -48,11 +48,11 @@ bool IsExistInAirCondDevList(int deviceID)
     return 0;
 }
 
-void DevertAirCondDevList(AppAirCondDev_l *node)
+void DevertAHUDevList(AppAHUDev_l *node)
 {
     assert(node != NULL);
 
-    AppAirCondDev_l *temp = AirCondList_head;
+    AppAHUDev_l *temp = AirCondList_head;
 
     /* 非空，遍历到尾 */
     while(temp->next != NULL){
@@ -63,13 +63,13 @@ void DevertAirCondDevList(AppAirCondDev_l *node)
 
 }
 
-void DelAirCondDevList(AppAirCondDev_l *node)
+void DelAHUDevList(AppAHUDev_l *node)
 {
     assert(node != NULL);
-    AppAirCondDev_l *temp = AirCondList_head;
+    AppAHUDev_l *temp = AirCondList_head;
 
     while(temp->next != NULL){
-        if(temp->next->AirCondDev.deviceID == node->AirCondDev.deviceID){
+        if(temp->next->AHUDev.deviceID == node->AHUDev.deviceID){
             temp->next = node->next;
             free(node);
             break;
@@ -79,7 +79,7 @@ void DelAirCondDevList(AppAirCondDev_l *node)
 }
 
 /* 根据点位name判断链表中是否存在该点位 */
-int IsPointExist(char *name, AppAirCondDev_t *Dev)
+int IsPointExist(char *name, AppAHUDev_t *Dev)
 {
     int i;
 
@@ -94,7 +94,7 @@ int IsPointExist(char *name, AppAirCondDev_t *Dev)
 /* 根据参数name，从实例Dev中查询点位的deviceKey
  * @name: 点位的name
  */
-int QueryDeviceKeyFromAirCondList(char *name, AppAirCondDev_t *Dev)
+int QueryDeviceKeyFromAirCondList(char *name, AppAHUDev_t *Dev)
 {
     int i, ret;
 
@@ -110,7 +110,7 @@ int QueryDeviceKeyFromAirCondList(char *name, AppAirCondDev_t *Dev)
 /* 根据参数name，从实例Dev中查询int型点位的val 
  * @name: 点位的name
  */
-int QueryIntValFromAirCondList(char *name, AppAirCondDev_t *Dev)
+int QueryIntValFromAirCondList(char *name, AppAHUDev_t *Dev)
 {
     int i, ret;
 
@@ -126,7 +126,7 @@ int QueryIntValFromAirCondList(char *name, AppAirCondDev_t *Dev)
 /* 根据参数name，从实例Dev中查询double型点位的val 
  * @name: 点位的name
  */
-double QueryDoubleValFromAirCondList(char *name, AppAirCondDev_t *Dev)
+double QueryDoubleValFromAirCondList(char *name, AppAHUDev_t *Dev)
 {
     int i;
     double ret;
@@ -143,7 +143,7 @@ double QueryDoubleValFromAirCondList(char *name, AppAirCondDev_t *Dev)
 /* 根据参数name，从实例Dev中查询double型点位的val 
  * @name: 点位的name
  */
-double *QueryDoublePtrFromAirCondList(char *name, AppAirCondDev_t *Dev)
+double *QueryDoublePtrFromAirCondList(char *name, AppAHUDev_t *Dev)
 {
     int i;
     double *ret = NULL;
@@ -161,7 +161,7 @@ double *QueryDoublePtrFromAirCondList(char *name, AppAirCondDev_t *Dev)
  * 根据参数name从实例Dev中找到点位，将val赋值给对应变量
  * @name: 点位的name
  */
-void SetVal2AirCondList(char *name, AppAirCondDev_t *Dev, DataType_u val)
+void SetVal2AirCondList(char *name, AppAHUDev_t *Dev, DataType_u val)
 {
     int i;
 

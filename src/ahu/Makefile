@@ -12,9 +12,10 @@ INCLUDE= \
 	-I${PRJDIR}/src/${APP}/ahupid \
 	-I${PRJDIR}/src/signal \
 	-I${PRJDIR}/src/es_print \
-	-I${PRJDIR}/src/pid
+	-I${PRJDIR}/src/pid \
+	-I${PRJDIR}/src
 
-LIB=-lpthread -lxml2 -lmosquitto -lcjson -ljson-c
+LIB=-lpthread -lmosquitto -ljson-c
 
 EXE=aaaa
 

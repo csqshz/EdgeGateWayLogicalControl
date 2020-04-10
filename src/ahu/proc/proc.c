@@ -6,16 +6,16 @@
 #include "proc.h"
 #include "es_print.h"
 #include "mqttlib.h"
-#include "list.h"
+#include "ahulist.h"
 #include "app.h"
 #include "thread_signal.h"
-#include "data.h"
+#include "ahudata.h"
 #include "ahupid_func.h"
 
 extern ThreadSignal_t TS_WaitPlat;	// 空调启动状态条件变量
 extern struct mosquitto *MqttAirCond;
 
-extern AppAirCondDev_l *AirCondList_head;
+extern AppAHUDev_l *AirCondList_head;
 extern PointProp_t ppinit;
 
 /* 发给下层的json datagram template,用于向设备write/read点位值
@@ -37,7 +37,7 @@ char *AirAppTempl1 = "{\"deviceKey\":\"1300\",\"function\":{\"virpointKey\":\"3\
 /* @brief: 根据点位名字，重构Template1
  * @PointName：点位名字
  */
-struct json_object * RestructJsonTempl1(AppAirCondDev_t *Dev, char *PointName)
+struct json_object * RestructJsonTempl1(AppAHUDev_t *Dev, char *PointName)
 {
     int i;
     /* 从设备点位集中找到点位 */
@@ -146,7 +146,7 @@ void AddErrCode2Json(struct json_object *jRoot, enum ErrorCode ErrCode)
  * @ oper：操作指令，read/write
  * @ template：payload模板
  */
-void SendCmd2Low(char *name, AppAirCondDev_t *Dev, enum CmdOper oper, char *template)
+void SendCmd2Low(char *name, AppAHUDev_t *Dev, enum CmdOper oper, char *template)
 {
     /* 目前没有read操作 */
     if(oper == CMD_READ){
@@ -267,7 +267,7 @@ void InitPointProp(PointProp_t *dest, PointProp_t *src, int start, int end)
  *      "xxx": "xxx"
  *  } 
  */
-void ExtractVirPoint(struct json_object *jVirPoint, int deviceKey, AppAirCondDev_t *Device)
+void ExtractVirPoint(struct json_object *jVirPoint, int deviceKey, AppAHUDev_t *Device)
 {
     json_type jtype;
     /* get 虚点的个数，申请相应内存 */
@@ -329,7 +329,7 @@ void ExtractVirPoint(struct json_object *jVirPoint, int deviceKey, AppAirCondDev
 }
 
 /* 根据虚点的个数，申请相应的内存，将jRealPoint报文中的点位信息赋值给设备节点Dev */
-void ExtractRealPoint(struct json_object *jRealPoint, AppAirCondDev_t *Dev)
+void ExtractRealPoint(struct json_object *jRealPoint, AppAHUDev_t *Dev)
 {
     /* 实点操作 */
     struct json_object *jdeviceKey, *jMap, *jMapKey;
@@ -472,7 +472,7 @@ void ExtractRealPoint(struct json_object *jRealPoint, AppAirCondDev_t *Dev)
 }
 
 /* 解析虚实点，赋值给设备实例 */
-void ExtractPoints(AppAirCondDev_t *Dev, struct json_object *jRoot)
+void ExtractPoints(AppAHUDev_t *Dev, struct json_object *jRoot)
 {
     pthread_mutex_lock(&Dev->lock);
 
@@ -543,17 +543,17 @@ int AddDevFromJson(struct json_object *jRoot)
     VirDeviceKey = GetIntValByKey(jData, "deviceKey");
     deviceID = VirDeviceKey;
 
-    AppAirCondDev_l *node;
+    AppAHUDev_l *node;
 
     pthread_mutex_lock(&AirCondList_head->lock);
 
     /* 根据deviceID判断链表中此设备实例是否存在，0：不存在，就添加新实例 */
-    if(IsExistInAirCondDevList(deviceID) == 0){
-        node = NewAirCondDevNode(deviceID);
-        DevertAirCondDevList(node);
+    if(IsExistInAHUDevList(deviceID) == 0){
+        node = NewAHUDevNode(deviceID);
+        DevertAHUDevList(node);
 
         /* 解析虚/实点，assign to 设备实例 */
-        ExtractPoints(&node->AirCondDev, jData);
+        ExtractPoints(&node->AHUDev, jData);
 
         ES_PRT_INFO("deviceID <%d> has been added to instance list \n", deviceID);
         /* pid init */
@@ -625,7 +625,7 @@ void AddDevFromLocal()
 /* @brief：将jNewVirPoint中包含的点位和实例Dev中的虚点的deviceKey和function一一对比
  * 只要比对的上，说明平台要更新这些虚点的value
  */
-void _UpdatePoints(struct json_object *jPoints, AppAirCondDev_t *Dev, int deviceKey)
+void _UpdatePoints(struct json_object *jPoints, AppAHUDev_t *Dev, int deviceKey)
 {
     int i;
 
@@ -688,7 +688,7 @@ void _UpdatePoints(struct json_object *jPoints, AppAirCondDev_t *Dev, int device
  */
 unsigned int UpdatePoints(struct json_object *jRoot)
 {
-    AppAirCondDev_l *node;
+    AppAHUDev_l *node;
 
     unsigned int deviceKey;
     deviceKey = GetIntValByKey(jRoot, "deviceKey");
@@ -702,9 +702,9 @@ unsigned int UpdatePoints(struct json_object *jRoot)
     pthread_mutex_lock(&AirCondList_head->lock);
 
     for(node = AirCondList_head->next; node != NULL; node = node->next){
-        pthread_mutex_lock(&node->AirCondDev.lock);
-        _UpdatePoints(jFunc, &node->AirCondDev, deviceKey);
-        pthread_mutex_unlock(&node->AirCondDev.lock);
+        pthread_mutex_lock(&node->AHUDev.lock);
+        _UpdatePoints(jFunc, &node->AHUDev, deviceKey);
+        pthread_mutex_unlock(&node->AHUDev.lock);
     }
 
     pthread_mutex_unlock(&AirCondList_head->lock);
@@ -815,19 +815,19 @@ void DelDevFromList(unsigned int deviceID)
 {
     pthread_mutex_lock(&AirCondList_head->lock);
 
-    AppAirCondDev_l *node;
+    AppAHUDev_l *node;
 
     for(node=AirCondList_head->next; node!=NULL; node=node->next){
 
-        if(node->AirCondDev.deviceID == deviceID){
+        if(node->AHUDev.deviceID == deviceID){
             /* free 点位 */
-            pthread_mutex_lock(&node->AirCondDev.lock);
-            free(node->AirCondDev.PointProp);
-            pthread_mutex_unlock(&node->AirCondDev.lock);
+            pthread_mutex_lock(&node->AHUDev.lock);
+            free(node->AHUDev.PointProp);
+            pthread_mutex_unlock(&node->AHUDev.lock);
 
             /* free 设备 */
-            DelAirCondDevList(node);
-            ES_PRT_INFO("Delete device from list(deviceID = %d) \n", node->AirCondDev.deviceID);
+            DelAHUDevList(node);
+            ES_PRT_INFO("Delete device from list(deviceID = %d) \n", node->AHUDev.deviceID);
         }
 
     }

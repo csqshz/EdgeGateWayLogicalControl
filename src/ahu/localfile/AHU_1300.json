@@ -13,6 +13,8 @@
       "OAD-MIN":10.3,
       "RA-MIN":10.4,
       "VLV-MIN":10.5,
+      "VSD-MIN":null,
+      "VSD-MAX":null,
       "WS-EX":1,
       "virpointKey":"3",
       "SF-ENA":false,
@@ -183,6 +185,78 @@
         "deviceKey":"",
         "jsonMap":{
           "key":""
+        }
+      },
+      "FA-T":{
+        "deviceKey":"1328",
+        "jsonMap":{
+          "key":"channel28-value"
+        }
+      },
+      "FA-H":{
+        "deviceKey":"1329",
+        "jsonMap":{
+          "key":"channel29-value"
+        }
+      },
+      "CV-FB":{
+        "deviceKey":"1330",
+        "jsonMap":{
+          "key":"channel30-value"
+        }
+      },
+      "HV-FB":{
+        "deviceKey":"1331",
+        "jsonMap":{
+          "key":"channel31-value"
+        }
+      },
+      "VSD-FB":{
+        "deviceKey":"1332",
+        "jsonMap":{
+          "key":"channel32-value"
+        }
+      },
+      "VSD-F":{
+        "deviceKey":"1333",
+        "jsonMap":{
+          "key":"channel33-value"
+        }
+      },
+      "VSD-C":{
+        "deviceKey":"1334",
+        "jsonMap":{
+          "key":"channel34-value"
+        }
+      },
+      "VSD-S":{
+        "deviceKey":"1335",
+        "jsonMap":{
+          "key":"channel35-value"
+        }
+      },
+      "PFILT-S":{
+        "deviceKey":"1336",
+        "jsonMap":{
+          "key":"channel36-value"
+        }
+      },
+      "SFILT-S":{
+        "deviceKey":"1337",
+        "jsonMap":{
+          "key":"channel37-value"
+        }
+      },
+      "SED-S":{
+        "deviceKey":"1338",
+        "jsonMap":{
+          "key":"channel38-value"
+        }
+      },
+      "SED-F":{
+        "deviceKey":"1339",
+        "jsonMap":{
+          "key":"channel39-value"
         }
       }
     }

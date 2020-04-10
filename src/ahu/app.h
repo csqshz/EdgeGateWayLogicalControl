@@ -4,9 +4,8 @@
 #include <stdbool.h>
 #include <json-c/json_util.h>
 #include <json-c/json.h>
-#include "data.h"
+#include "ahudata.h"
 #include "proc.h"
-#include "data.h"
 
 #ifndef _APP_H_
 #define _APP_H_

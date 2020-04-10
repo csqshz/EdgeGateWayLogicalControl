@@ -3,7 +3,7 @@
 #include "es_print.h"
 #include "proc.h"
 #include "thread_signal.h"
-#include "list.h"
+#include "ahulist.h"
 
 ThreadSignal_t TS_WaitPlat;	// 空调启动状态条件变量
 
@@ -11,7 +11,7 @@ extern struct mosquitto *MqttAirCond;
 extern bool clean_session;
 extern bool unclean_session;
 
-extern AppAirCondDev_l *AirCondList_head;
+extern AppAHUDev_l *AirCondList_head;
 
 int main(int argc, const char *argv[])
 {

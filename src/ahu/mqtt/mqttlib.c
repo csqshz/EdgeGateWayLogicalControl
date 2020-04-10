@@ -21,7 +21,7 @@ void  PublishWriteBack(struct json_object *jRoot)
 	mosquitto_publish(MqttAirCond, NULL, topic, strlen(str), str, 0, 0);
 }
 
-void SubMqttByDeviceKey(AppAirCondDev_t *Dev)
+void SubMqttByDeviceKey(AppAHUDev_t *Dev)
 {
 	int i;
 	char topic_ack[100];

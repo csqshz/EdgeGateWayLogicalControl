@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include "data.h"
+#include "ahudata.h"
 
 #define SUCCESS 0
 #define JFILESIZE_10K		(10*1024)
@@ -69,14 +69,14 @@
 }
 
 void AddDevFromLocal();
-void ExtractPoints(AppAirCondDev_t *, struct json_object *);
+void ExtractPoints(AppAHUDev_t *, struct json_object *);
 void MqttMessProc(char *message);
 void MqttCmdMessProc(char *message, char *topic);
-void SendCmd2Low(char *name, AppAirCondDev_t *Dev, enum CmdOper oper, char *template);
+void SendCmd2Low(char *name, AppAHUDev_t *Dev, enum CmdOper oper, char *template);
 int deviceKey2deviceID(int deviceKey);
 int GetIntValByKey(struct json_object *jRoot, char *key);
 int UpdateVal2Local(unsigned int deviceID, char *name);
-struct json_object *RestructJsonTempl1(AppAirCondDev_t *Dev, char *PointName);
+struct json_object *RestructJsonTempl1(AppAHUDev_t *Dev, char *PointName);
 void UpdateVirPoints2Local(struct json_object *jRoot);
 
 #endif //__PROC_H__

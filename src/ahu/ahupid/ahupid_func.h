@@ -1,13 +1,13 @@
 #ifndef __AIRPID_FUNC__
 #define __AIRPID_FUNC__
 
-#include "data.h"
+#include "ahudata.h"
 
-void PidInitHmdt(AppAirCondDev_l *node);
-void PidInitTemp(AppAirCondDev_l *node);
-void PidInitCO2(AppAirCondDev_l *node);
-void AirCondHmdtSM(AppAirCondDev_l *node);
-void AirCondHmdtAM(AppAirCondDev_l *node);
-void AirCondTempAM(AppAirCondDev_l *node);
+void PidInitHmdt(AppAHUDev_l *node);
+void PidInitTemp(AppAHUDev_l *node);
+void PidInitCO2(AppAHUDev_l *node);
+void AirCondHmdtSM(AppAHUDev_l *node);
+void AirCondHmdtAM(AppAHUDev_l *node);
+void AirCondTempAM(AppAHUDev_l *node);
 
 #endif  //__AIRPID_FUNC__

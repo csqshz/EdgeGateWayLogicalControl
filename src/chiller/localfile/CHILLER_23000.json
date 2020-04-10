@@ -1,5 +1,5 @@
 {
-  "deviceKey":"gatewayKey",
+  "deviceKey":"gatewaydeviceKey",
   "channel":"virDev",
   "cmd":"addDevice",
   "data":{
@@ -7,62 +7,66 @@
     "sn":"",
     "alias":"",
     "function":{
-      "CH-RT":"", //冷机运行时间
-      "CH-MAX-IP":"", //最大输入功率（电）
-      "CH-MAX-OP":"", //最大输出功率（制冷）
-      "E-DP-MIN":"10.3",  //最不利末端压差设定值
-      "CH-NUM":"10.4",  //冷机当前运行台数
-      "PCHWP-NUM":"10.5", //初级冷冻水泵运行台数
-      "CWP-NUM":"1",  //冷却水泵运行台数
-      "CTF-NUM":"1", //冷却塔风机运行台数
-      "CHW-TSP":"78",  //冷机机组冷冻水出水温度设定点
-      "CHW-BP-DPSP": "",  //冷冻水旁通阀压差设定点
-      "CWR-TSP": "",  //冷却水回水温度设定点
-      "C-CALL": "", //冷水主机系统总启停命令
-      "C-LOAD": "", //系统冷负荷
+      "CH-RT":null, //冷机运行时间
+      "CH-MAX-IP":null, //最大输入功率（电）
+      "CH-MAX-OP":null, //最大输出功率（制冷）
+      "E-DP-MIN":null,  //最不利末端压差设定值
+      
+      //设备运行台数，初始值0，有app计算后反映给平台
+      "CH-NUM":0,  //冷机当前运行台数
+      "PCHWP-NUM":0, //初级冷冻水泵运行台数
+      "CWP-NUM":0,  //冷却水泵运行台数
+      "CTF-NUM":0, //冷却塔风机运行台数
+
+      "CHW-BP-DPSP":null,  //冷冻水旁通阀压差设定点
+      "CHW-TSP":7.0,  //冷机机组冷冻水出水温度设定点
+      "CWR-TSP": 37.0,  //冷却水回水温度设定点
+      "C-CALL": false, //冷水主机系统总启停命令
+      "C-LOAD":0, //系统冷负荷，必选点位，app内部计算使用, 初始值0
 
       //初级冷冻水泵是否变频, 【！！！这里第n个数组成员和configuration中初级冷冻水泵PCHWP的第n个数组成员务必指向同一个水泵】
       "PCHWP": [
         //第一个水泵
         {
-          "PCHWP-IS-VSD": "", //1: 变频，0：定频，此点位不能为空，由平台给值
-          "PCHWP-VSD-MAX": "",  //初级冷冻水泵频率上限，如果变频，那么此点位不能为空
-          "PCHWP-VSD-MIN": "" //初级冷冻水泵频率下限，如果变频，那么此点位不能为空
+          "PCHWP-IS-VSD":1, //1: 变频，0：定频，此点位不能为空，由平台给值
+          "PCHWP-VSD-MAX":50.0,  //初级冷冻水泵频率上限，如果变频，那么此点位不能为空
+          "PCHWP-VSD-MIN":30.0 //初级冷冻水泵频率下限，如果变频，那么此点位不能为空
         },
         //第二个水泵
         {
-          "PCHWP-IS-VSD": "", //1: 变频，0：定频，此点位不能为空，由平台给值
-          "PCHWP-VSD-MAX": "",  //初级冷冻水泵频率上限，如果变频，那么此点位不能为空
-          "PCHWP-VSD-MIN": "" //初级冷冻水泵频率下限，如果变频，那么此点位不能为空
+          "PCHWP-IS-VSD":0, //1: 变频，0：定频，此点位不能为空，由平台给值
+          "PCHWP-VSD-MAX":null,  //初级冷冻水泵频率上限，如果变频，那么此点位不能为空
+          "PCHWP-VSD-MIN":null //初级冷冻水泵频率下限，如果变频，那么此点位不能为空
         }
       ],
       //冷却水泵是否变频,【！！！这里第一个数组成员和configuration中初级冷却水泵CWP的第一个数组成员指向务必同一个水泵】
       "CWP": [
         //第一个水泵
         {
-          "CWP-IS-VSD": "", //1: 变频，0：定频，此点位不能为空，由平台给值
-          "CWP-VSD-MAX": "",  //冷却水泵频率上限，如果变频，那么此点位不能为空
-          "CWP-VSD-MIN": "" //冷却水泵频率下限，如果变频，那么此点位不能为空
+          "CWP-IS-VSD":1, //1: 变频，0：定频，此点位不能为空，由平台给值
+          "CWP-VSD-MAX":50.0,  //冷却水泵频率上限，如果变频，那么此点位不能为空
+          "CWP-VSD-MIN":30.0 //冷却水泵频率下限，如果变频，那么此点位不能为空
         },
         //第二个水泵
         {
-          "CWP-IS-VSD": "",
-          "CWP-VSD-MAX": "",  //冷却水泵频率上限，如果变频，那么此点位不能为空
-          "CWP-VSD-MIN": "" //冷却水泵频率下限，如果变频，那么此点位不能为空
+          "CWP-IS-VSD":0,
+          "CWP-VSD-MAX":null,  //冷却水泵频率上限，如果变频，那么此点位不能为空
+          "CWP-VSD-MIN":null //冷却水泵频率下限，如果变频，那么此点位不能为空
         }
       ],
       //冷却塔风扇是否变频,【！！！这里第一个数组成员和configuration中初级冷却塔CTF的第一个数组成员指向务必同一个水泵】
       "CTF": [
-        //第一个塔，塔内的所有风扇型号一致，要么都变频，要么都定频
+        //第一个塔内的所有风扇型号一致，要么都变频，要么都定频
         {
-          "CTF-IS-VSD": "", //1: 变频，0：定频，此点位不能为空，由平台给值
-          "CTF-VSD-MAX": "",  //冷却塔风扇频率上限
-          "CTF-VSD-MIN": "" //冷却塔风扇频率下限
+          "CTF-IS-VSD":1, //1: 变频，0：定频，此点位不能为空，由平台给值
+          "CTF-VSD-MAX":60.0,  //冷却塔风扇频率上限
+          "CTF-VSD-MIN":30.0 //冷却塔风扇频率下限
         },
+        //第二个塔内的所有风扇型号一致
         {
-          "CTF-IS-VSD": "", //1: 变频，0：定频，此点位不能为空，由平台给值
-          "CTF-VSD-MAX": "",  //冷却塔风扇频率上限
-          "CTF-VSD-MIN": "" //冷却塔风扇频率下限
+          "CTF-IS-VSD":0, //1: 变频，0：定频，此点位不能为空，由平台给值
+          "CTF-VSD-MAX":null,  //冷却塔风扇频率上限
+          "CTF-VSD-MIN":null //冷却塔风扇频率下限
         }  
       ],
 
@@ -97,10 +101,10 @@
         {
           //冷机必选
           "CH-C": {"deviceKey":"23001", "jsonMap":{"key":"ch1"}}, //冷机启停开关
+          //冷机 可选
           "CH-S": {"deviceKey":"23002", "jsonMap":{"key":"ch2"}}, //运行状态
           "CH-F": {"deviceKey":"23003", "jsonMap":{"key":"ch3"}}, //故障状态
           "CH-AM":{"deviceKey":"23004", "jsonMap":{"key":"ch4"}}, //手自动
-          //冷机 可选
           "CHIV-VC":{"deviceKey":"23005", "jsonMap":{"key":"ch5"}}, //冷冻水侧蝶阀开关
           "CHIV-OS":{"deviceKey":"23006", "jsonMap":{"key":"ch6"}}, //冷冻水侧蝶阀开状态反馈
           "CHIV-CS":{"deviceKey":"23007", "jsonMap":{"key":"ch7"}}, //冷冻水侧蝶阀关状态反馈
@@ -117,10 +121,10 @@
         {
           //冷机必选
           "CH-C": {"deviceKey":"23001", "jsonMap":{"key":"ch1"}}, //冷机启停开关
+          //冷机 可选
           "CH-S": {"deviceKey":"23002", "jsonMap":{"key":"ch2"}}, //运行状态
           "CH-F": {"deviceKey":"23003", "jsonMap":{"key":"ch3"}}, //故障状态
           "CH-AM":{"deviceKey":"23004", "jsonMap":{"key":"ch4"}}, //手自动
-          //冷机 可选
           "CHIV-VC":{"deviceKey":"23005", "jsonMap":{"key":"ch5"}}, //冷冻水侧蝶阀开关
           "CHIV-OS":{"deviceKey":"23006", "jsonMap":{"key":"ch6"}}, //冷冻水侧蝶阀开状态反馈
           "CHIV-CS":{"deviceKey":"23007", "jsonMap":{"key":"ch7"}}, //冷冻水侧蝶阀关状态反馈
@@ -139,10 +143,10 @@
         //第一个设备
         {   //初级冷冻水泵 必选
             "PCHWP-C":{"deviceKey":"23016", "jsonMap":{"key":"ch16"}},  //启停开关
+            //初级冷冻水泵 可选
             "PCHWP-S":{"deviceKey":"23017", "jsonMap":{"key":"ch17"}},  //运行状态
             "PCHWP-F":{"deviceKey":"23018", "jsonMap":{"key":"ch18"}},  //故障状态
             "PCHWP-AM":{"deviceKey":"23019", "jsonMap":{"key":"ch19"}}, //手/自动状态
-            //初级冷冻水泵 可选
             "PCHWP-FLS":{"deviceKey":"23021", "jsonMap":{"key":"ch21"}},  //水流状态
             "PCHWP-VS":{"deviceKey":"23022", "jsonMap":{"key":"ch22"}}, //蝶阀状态
             "PCHWP-VC":{"deviceKey":"23023", "jsonMap":{"key":"ch23"}},  //蝶阀开关
@@ -156,10 +160,10 @@
         //第二个设备
         { //初级冷冻水泵 必选
           "PCHWP-C":{"deviceKey":"23031", "jsonMap":{"key":"ch31"}},  //启停开关
+          //初级冷冻水泵 可选
           "PCHWP-S":{"deviceKey":"23032", "jsonMap":{"key":"ch32"}},  //运行状态
           "PCHWP-F":{"deviceKey":"23033", "jsonMap":{"key":"ch33"}},  //故障状态
           "PCHWP-AM":{"deviceKey":"23034", "jsonMap":{"key":"ch34"}}, //手/自动状态
-          //初级冷冻水泵 可选
           "PCHWP-FLS":{"deviceKey":"23036", "jsonMap":{"key":"ch36"}},  //水流状态
           "PCHWP-VS":{"deviceKey":"23037", "jsonMap":{"key":"ch37"}}, //蝶阀状态
           "PCHWP-VC":{"deviceKey":"23038", "jsonMap":{"key":"ch38"}},  //蝶阀开关
@@ -178,9 +182,6 @@
         {
           //冷却水泵 必选
           "CWP-C":{"deviceKey":"23046", "jsonMap":{"key":"ch46"}}, //启停开关
-          "CWP-S":{"deviceKey":"23047", "jsonMap":{"key":"ch47"}}, //运行状态
-          "CWP-F":{"deviceKey":"23048", "jsonMap":{"key":"ch48"}}, //故障状态
-          "CWP-AM":{"deviceKey":"23049", "jsonMap":{"key":"ch49"}}, //手/自动状态
           //冷却水泵 变频必选
           "CWP-VSD":{"deviceKey":"23051", "jsonMap":{"key":"ch51"}}, //频率调节
           "CWP-VSD-FB":{"deviceKey":"23052", "jsonMap":{"key":"ch52"}}, //频率反馈
@@ -188,15 +189,15 @@
           //冷却水泵 可选
           "CWP-FLS":{"deviceKey":"23056", "jsonMap":{"key":"ch56"}}, //水流状态
           "CWP-VS":{"deviceKey":"23057", "jsonMap":{"key":"ch57"}}, //蝶阀状态
-          "CWP-VC":{"deviceKey":"23058", "jsonMap":{"key":"ch58"}} //蝶阀开关
+          "CWP-VC":{"deviceKey":"23058", "jsonMap":{"key":"ch58"}}, //蝶阀开关
+          "CWP-S":{"deviceKey":"23047", "jsonMap":{"key":"ch47"}}, //运行状态
+          "CWP-F":{"deviceKey":"23048", "jsonMap":{"key":"ch48"}}, //故障状态
+          "CWP-AM":{"deviceKey":"23049", "jsonMap":{"key":"ch49"}} //手/自动状态
         },
         //第二个设备
         {
           //冷却水泵 必选
           "CWP-C":{"deviceKey":"23059", "jsonMap":{"key":"ch59"}}, //启停开关
-          "CWP-S":{"deviceKey":"23060", "jsonMap":{"key":"ch60"}}, //运行状态
-          "CWP-F":{"deviceKey":"23061", "jsonMap":{"key":"ch61"}}, //故障状态
-          "CWP-AM":{"deviceKey":"23062", "jsonMap":{"key":"ch62"}}, //手/自动状态
           //冷却水泵 变频必选
           "CWP-VSD":{"deviceKey":"23064", "jsonMap":{"key":"ch64"}}, //频率调节
           "CWP-VSD-FB":{"deviceKey":"23065", "jsonMap":{"key":"ch65"}}, //频率反馈
@@ -204,102 +205,110 @@
           //冷却水泵 可选
           "CWP-FLS":{"deviceKey":"23069", "jsonMap":{"key":"ch69"}}, //水流状态
           "CWP-VS":{"deviceKey":"23070", "jsonMap":{"key":"ch70"}}, //蝶阀状态
-          "CWP-VC":{"deviceKey":"23071", "jsonMap":{"key":"ch71"}} //蝶阀开关
+          "CWP-VC":{"deviceKey":"23071", "jsonMap":{"key":"ch71"}}, //蝶阀开关
+          "CWP-S":{"deviceKey":"23060", "jsonMap":{"key":"ch60"}}, //运行状态
+          "CWP-F":{"deviceKey":"23061", "jsonMap":{"key":"ch61"}}, //故障状态
+          "CWP-AM":{"deviceKey":"23062", "jsonMap":{"key":"ch62"}} //手/自动状态
         }
       ],
 
-//冷却塔
-      "CT": [
-        //冷却塔1
-        {
-          //冷却塔风扇
-          "CTF":[
-            //风扇1
-            {
-              //风扇 必选
-              "CTF-C":{"deviceKey":"23072", "jsonMap":{"key":"ch72"}}, //冷却塔风扇启停开关
-              "CTF-S":{"deviceKey":"23073", "jsonMap":{"key":"ch73"}}, //冷却塔风扇状态
-              "CTF-F":{"deviceKey":"23074", "jsonMap":{"key":"ch74"}}, //冷却塔风扇故障报警
-              "CTF-AM":{"deviceKey":"23075", "jsonMap":{"key":"ch75"}}, //冷却塔风扇手自动
-              //风扇 变频必选
-              "CTF-VSD":{"deviceKey":"23077", "jsonMap":{"key":"ch77"}}, //冷却塔风机变频调节
-              "CTF-VSD-C":{"deviceKey":"23077", "jsonMap":{"key":"ch78"}}, //冷却塔风机变频器启停
-              "CTF-VSD-FB":{"deviceKey":"23079", "jsonMap":{"key":"ch79"}} //冷却塔风机频率反馈
-            },
-            //风扇2
-            {
-              //风扇 必选
-              "CTF-C":{"deviceKey":"23072", "jsonMap":{"key":"ch72"}}, //冷却塔风扇启停开关
-              "CTF-S":{"deviceKey":"23073", "jsonMap":{"key":"ch73"}}, //冷却塔风扇状态
-              "CTF-F":{"deviceKey":"23074", "jsonMap":{"key":"ch74"}}, //冷却塔风扇故障报警
-              "CTF-AM":{"deviceKey":"23075", "jsonMap":{"key":"ch75"}}, //冷却塔风扇手自动
-              //风扇 变频必选
-              "CTF-VSD":{"deviceKey":"23077", "jsonMap":{"key":"ch77"}}, //冷却塔风机变频调节
-              "CTF-VSD-C":{"deviceKey":"23077", "jsonMap":{"key":"ch78"}}, //冷却塔风机变频器启停
-              "CTF-VSD-FB":{"deviceKey":"23079", "jsonMap":{"key":"ch79"}} //冷却塔风机频率反馈
-            }
-          ],
-          //冷却塔1 可选
-          "CTSV-OS":{"deviceKey":"23082", "jsonMap":{"key":"ch82"}}, //冷却塔供水蝶阀开状态反馈
-          "CTSV-CS":{"deviceKey":"23083", "jsonMap":{"key":"ch83"}}, //冷却塔供水蝶阀关状态反馈
-          "CTRV-OS":{"deviceKey":"23084", "jsonMap":{"key":"ch84"}}, //冷却塔回水蝶阀开状态反馈
-          "CTRV-CS":{"deviceKey":"23085", "jsonMap":{"key":"ch85"}}, //冷却塔回水蝶阀关状态反馈
-          "CTSV-S":{"deviceKey":"23086", "jsonMap":{"key":"ch86"}}, //冷却塔供水蝶阀开关状态
-          "CTRV-S":{"deviceKey":"23087", "jsonMap":{"key":"ch87"}}, //冷却塔回水蝶阀开关状态
-          "CTSV-C":{"deviceKey":"23088", "jsonMap":{"key":"ch88"}}, //冷却塔供水蝶阀开关命令
-          "CTRV-C":{"deviceKey":"23089", "jsonMap":{"key":"ch89"}} //冷却塔回水蝶阀开关命令
-        },
-        //冷却塔2
-        {
-          //冷却塔2的风扇
-          "CTF":[
-            //风扇1
-            {
-              //风扇 必选
-              "CTF-C":{"deviceKey":"23072", "jsonMap":{"key":"ch72"}}, //冷却塔风扇启停开关
-              "CTF-S":{"deviceKey":"23073", "jsonMap":{"key":"ch73"}}, //冷却塔风扇状态
-              "CTF-F":{"deviceKey":"23074", "jsonMap":{"key":"ch74"}}, //冷却塔风扇故障报警
-              "CTF-AM":{"deviceKey":"23075", "jsonMap":{"key":"ch75"}}, //冷却塔风扇手自动
-              //风扇 变频必选
-              "CTF-VSD":{"deviceKey":"23077", "jsonMap":{"key":"ch77"}}, //冷却塔风机变频调节
-              "CTF-VSD-C":{"deviceKey":"23077", "jsonMap":{"key":"ch78"}}, //冷却塔风机变频器启停
-              "CTF-VSD-FB":{"deviceKey":"23079", "jsonMap":{"key":"ch79"}} //冷却塔风机频率反馈
-            },
-            //风扇2
-            {
-              //风扇 必选
-              "CTF-C":{"deviceKey":"23072", "jsonMap":{"key":"ch72"}}, //冷却塔风扇启停开关
-              "CTF-S":{"deviceKey":"23073", "jsonMap":{"key":"ch73"}}, //冷却塔风扇状态
-              "CTF-F":{"deviceKey":"23074", "jsonMap":{"key":"ch74"}}, //冷却塔风扇故障报警
-              "CTF-AM":{"deviceKey":"23075", "jsonMap":{"key":"ch75"}}, //冷却塔风扇手自动
-              //风扇 变频必选
-              "CTF-VSD":{"deviceKey":"23077", "jsonMap":{"key":"ch77"}}, //冷却塔风机变频调节
-              "CTF-VSD-C":{"deviceKey":"23077", "jsonMap":{"key":"ch78"}}, //冷却塔风机变频器启停
-              "CTF-VSD-FB":{"deviceKey":"23079", "jsonMap":{"key":"ch79"}} //冷却塔风机频率反馈
-            }
-          ],
-          //冷却塔2 可选
-          "CTSV-OS":{"deviceKey":"23082", "jsonMap":{"key":"ch82"}}, //冷却塔供水蝶阀开状态反馈
-          "CTSV-CS":{"deviceKey":"23083", "jsonMap":{"key":"ch83"}}, //冷却塔供水蝶阀关状态反馈
-          "CTRV-OS":{"deviceKey":"23084", "jsonMap":{"key":"ch84"}}, //冷却塔回水蝶阀开状态反馈
-          "CTRV-CS":{"deviceKey":"23085", "jsonMap":{"key":"ch85"}}, //冷却塔回水蝶阀关状态反馈
-          "CTSV-S":{"deviceKey":"23086", "jsonMap":{"key":"ch86"}}, //冷却塔供水蝶阀开关状态
-          "CTRV-S":{"deviceKey":"23087", "jsonMap":{"key":"ch87"}}, //冷却塔回水蝶阀开关状态
-          "CTSV-C":{"deviceKey":"23088", "jsonMap":{"key":"ch88"}}, //冷却塔供水蝶阀开关命令
-          "CTRV-C":{"deviceKey":"23089", "jsonMap":{"key":"ch89"}} //冷却塔回水蝶阀开关命令
-        },
+//冷却塔组
+      "CTG": {
+        //冷却塔
+        "CT": [
+          //冷却塔1
+          {
+            //冷却塔1风扇
+            "CTF":[
+              //风扇1
+              {
+                //风扇 必选
+                "CTF-C":{"deviceKey":"23072", "jsonMap":{"key":"ch72"}}, //冷却塔风扇启停开关
+                //风扇 可选
+                "CTF-S":{"deviceKey":"23073", "jsonMap":{"key":"ch73"}}, //冷却塔风扇状态
+                "CTF-F":{"deviceKey":"23074", "jsonMap":{"key":"ch74"}}, //冷却塔风扇故障报警
+                "CTF-AM":{"deviceKey":"23075", "jsonMap":{"key":"ch75"}}, //冷却塔风扇手自动
+                //风扇 变频必选
+                "CTF-VSD":{"deviceKey":"23077", "jsonMap":{"key":"ch77"}}, //冷却塔风机变频调节
+                "CTF-VSD-C":{"deviceKey":"23077", "jsonMap":{"key":"ch78"}}, //冷却塔风机变频器启停
+                "CTF-VSD-FB":{"deviceKey":"23079", "jsonMap":{"key":"ch79"}} //冷却塔风机频率反馈
+              },
+              //风扇2
+              {
+                //风扇 必选
+                "CTF-C":{"deviceKey":"23072", "jsonMap":{"key":"ch72"}}, //冷却塔风扇启停开关
+                //风扇 可选
+                "CTF-S":{"deviceKey":"23073", "jsonMap":{"key":"ch73"}}, //冷却塔风扇状态
+                "CTF-F":{"deviceKey":"23074", "jsonMap":{"key":"ch74"}}, //冷却塔风扇故障报警
+                "CTF-AM":{"deviceKey":"23075", "jsonMap":{"key":"ch75"}}, //冷却塔风扇手自动
+                //风扇 变频必选
+                "CTF-VSD":{"deviceKey":"23077", "jsonMap":{"key":"ch77"}}, //冷却塔风机变频调节
+                "CTF-VSD-C":{"deviceKey":"23077", "jsonMap":{"key":"ch78"}}, //冷却塔风机变频器启停
+                "CTF-VSD-FB":{"deviceKey":"23079", "jsonMap":{"key":"ch79"}} //冷却塔风机频率反馈
+              }
+            ],
+            //冷却塔1 可选
+            "CTSV-OS":{"deviceKey":"23082", "jsonMap":{"key":"ch82"}}, //冷却塔供水蝶阀开状态反馈
+            "CTSV-CS":{"deviceKey":"23083", "jsonMap":{"key":"ch83"}}, //冷却塔供水蝶阀关状态反馈
+            "CTRV-OS":{"deviceKey":"23084", "jsonMap":{"key":"ch84"}}, //冷却塔回水蝶阀开状态反馈
+            "CTRV-CS":{"deviceKey":"23085", "jsonMap":{"key":"ch85"}}, //冷却塔回水蝶阀关状态反馈
+            "CTSV-S":{"deviceKey":"23086", "jsonMap":{"key":"ch86"}}, //冷却塔供水蝶阀开关状态
+            "CTRV-S":{"deviceKey":"23087", "jsonMap":{"key":"ch87"}}, //冷却塔回水蝶阀开关状态
+            "CTSV-C":{"deviceKey":"23088", "jsonMap":{"key":"ch88"}}, //冷却塔供水蝶阀开关命令
+            "CTRV-C":{"deviceKey":"23089", "jsonMap":{"key":"ch89"}} //冷却塔回水蝶阀开关命令
+          },
+          //冷却塔2
+          {
+            //冷却塔2的风扇
+            "CTF":[
+              //风扇1
+              {
+                //风扇 必选
+                "CTF-C":{"deviceKey":"23072", "jsonMap":{"key":"ch72"}}, //冷却塔风扇启停开关
+                //风扇 可选
+                "CTF-S":{"deviceKey":"23073", "jsonMap":{"key":"ch73"}}, //冷却塔风扇状态
+                "CTF-F":{"deviceKey":"23074", "jsonMap":{"key":"ch74"}}, //冷却塔风扇故障报警
+                "CTF-AM":{"deviceKey":"23075", "jsonMap":{"key":"ch75"}}, //冷却塔风扇手自动
+                //风扇 变频必选
+                "CTF-VSD":{"deviceKey":"23077", "jsonMap":{"key":"ch77"}}, //冷却塔风机变频调节
+                "CTF-VSD-C":{"deviceKey":"23077", "jsonMap":{"key":"ch78"}}, //冷却塔风机变频器启停
+                "CTF-VSD-FB":{"deviceKey":"23079", "jsonMap":{"key":"ch79"}} //冷却塔风机频率反馈
+              },
+              //风扇2
+              {
+                //风扇 必选
+                "CTF-C":{"deviceKey":"23072", "jsonMap":{"key":"ch72"}}, //冷却塔风扇启停开关
+                //风扇 可选
+                "CTF-S":{"deviceKey":"23073", "jsonMap":{"key":"ch73"}}, //冷却塔风扇状态
+                "CTF-F":{"deviceKey":"23074", "jsonMap":{"key":"ch74"}}, //冷却塔风扇故障报警
+                "CTF-AM":{"deviceKey":"23075", "jsonMap":{"key":"ch75"}}, //冷却塔风扇手自动
+                //风扇 变频必选
+                "CTF-VSD":{"deviceKey":"23077", "jsonMap":{"key":"ch77"}}, //冷却塔风机变频调节
+                "CTF-VSD-C":{"deviceKey":"23077", "jsonMap":{"key":"ch78"}}, //冷却塔风机变频器启停
+                "CTF-VSD-FB":{"deviceKey":"23079", "jsonMap":{"key":"ch79"}} //冷却塔风机频率反馈
+              }
+            ],
+            //冷却塔2 可选
+            "CTSV-OS":{"deviceKey":"23082", "jsonMap":{"key":"ch82"}}, //冷却塔供水蝶阀开状态反馈
+            "CTSV-CS":{"deviceKey":"23083", "jsonMap":{"key":"ch83"}}, //冷却塔供水蝶阀关状态反馈
+            "CTRV-OS":{"deviceKey":"23084", "jsonMap":{"key":"ch84"}}, //冷却塔回水蝶阀开状态反馈
+            "CTRV-CS":{"deviceKey":"23085", "jsonMap":{"key":"ch85"}}, //冷却塔回水蝶阀关状态反馈
+            "CTSV-S":{"deviceKey":"23086", "jsonMap":{"key":"ch86"}}, //冷却塔供水蝶阀开关状态
+            "CTRV-S":{"deviceKey":"23087", "jsonMap":{"key":"ch87"}}, //冷却塔回水蝶阀开关状态
+            "CTSV-C":{"deviceKey":"23088", "jsonMap":{"key":"ch88"}}, //冷却塔供水蝶阀开关命令
+            "CTRV-C":{"deviceKey":"23089", "jsonMap":{"key":"ch89"}} //冷却塔回水蝶阀开关命令
+          }
+        ],
         //总蝶阀
-        {
-          "CTSV-OS":{"deviceKey":"23082", "jsonMap":{"key":"ch82"}}, //冷却塔供水蝶阀开状态反馈
-          "CTSV-CS":{"deviceKey":"23083", "jsonMap":{"key":"ch83"}}, //冷却塔供水蝶阀关状态反馈
-          "CTRV-OS":{"deviceKey":"23084", "jsonMap":{"key":"ch84"}}, //冷却塔回水蝶阀开状态反馈
-          "CTRV-CS":{"deviceKey":"23085", "jsonMap":{"key":"ch85"}}, //冷却塔回水蝶阀关状态反馈
-          "CTSV-S":{"deviceKey":"23086", "jsonMap":{"key":"ch86"}}, //冷却塔供水蝶阀开关状态
-          "CTRV-S":{"deviceKey":"23087", "jsonMap":{"key":"ch87"}}, //冷却塔回水蝶阀开关状态
-          "CTSV-C":{"deviceKey":"23088", "jsonMap":{"key":"ch88"}}, //冷却塔供水蝶阀开关命令
-          "CTRV-C":{"deviceKey":"23089", "jsonMap":{"key":"ch89"}} //冷却塔回水蝶阀开关命令
-        }
-      ],
+        "CTSV-OS":{"deviceKey":"23082", "jsonMap":{"key":"ch82"}}, //冷却塔供水蝶阀开状态反馈
+        "CTSV-CS":{"deviceKey":"23083", "jsonMap":{"key":"ch83"}}, //冷却塔供水蝶阀关状态反馈
+        "CTRV-OS":{"deviceKey":"23084", "jsonMap":{"key":"ch84"}}, //冷却塔回水蝶阀开状态反馈
+        "CTRV-CS":{"deviceKey":"23085", "jsonMap":{"key":"ch85"}}, //冷却塔回水蝶阀关状态反馈
+        "CTSV-S":{"deviceKey":"23086", "jsonMap":{"key":"ch86"}}, //冷却塔供水蝶阀开关状态
+        "CTRV-S":{"deviceKey":"23087", "jsonMap":{"key":"ch87"}}, //冷却塔回水蝶阀开关状态
+        "CTSV-C":{"deviceKey":"23088", "jsonMap":{"key":"ch88"}}, //冷却塔供水蝶阀开关命令
+        "CTRV-C":{"deviceKey":"23089", "jsonMap":{"key":"ch89"}} //冷却塔回水蝶阀开关命令
+      },
 
 //系统
       "OA-T":{"deviceKey":"23108", "jsonMap":{"key":"ch108"}}, //室外温度

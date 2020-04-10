@@ -1,5 +1,5 @@
 #include "ahupid.h"
-#include "list.h"
+#include "ahulist.h"
 #include "es_print.h"
 #include "proc.h"
 #include <math.h>
@@ -7,13 +7,13 @@
 extern char *AirApp2Low;
 
 /* 调节模式温度控制：PID */
-void AirCondTempAM(AppAirCondDev_l *node)
+void AirCondTempAM(AppAHUDev_l *node)
 {
-    long *tv_sec = &node->AirCondDev.PidSet.PidT.tv_sec;
+    long *tv_sec = &node->AHUDev.PidSet.PidT.tv_sec;
 
-    double *in = node->AirCondDev.PidSet.PidT.in;
-    double *out = node->AirCondDev.PidSet.PidT.out;
-    double *set = node->AirCondDev.PidSet.PidT.set;
+    double *in = node->AHUDev.PidSet.PidT.in;
+    double *out = node->AHUDev.PidSet.PidT.out;
+    double *set = node->AHUDev.PidSet.PidT.set;
 
     time_t t;
     time(&t);
@@ -23,13 +23,13 @@ void AirCondTempAM(AppAirCondDev_l *node)
         /* (设定温度 - 回风温度)的绝对值 > 1℃ 才进行控制 */
         // 死区在pid内部实现，此处在pid外部通过偏差实现，其实意义不大
         if( fabs(*set - *in) > 1.0 ){
-            pid_compute(&node->AirCondDev.PidSet.PidT.pid);
+            pid_compute(&node->AHUDev.PidSet.PidT.pid);
             
-            ES_PRT_INFO("Temp(deviceID=%d): pid out = %f in = %f set %f \n", node->AirCondDev.deviceID, *out, *in, *set);
+            ES_PRT_INFO("Temp(deviceID=%d): pid out = %f in = %f set %f \n", node->AHUDev.deviceID, *out, *in, *set);
             /* SendCmd2Low 函数内部会判断点位是否选中，选中的才发送 */
-            SendCmd2Low(VLV_C, &node->AirCondDev, CMD_WRITE, AirApp2Low);
-            SendCmd2Low(CV_C, &node->AirCondDev, CMD_WRITE, AirApp2Low);
-            SendCmd2Low(HV_C, &node->AirCondDev, CMD_WRITE, AirApp2Low);
+            SendCmd2Low(VLV_C, &node->AHUDev, CMD_WRITE, AirApp2Low);
+            SendCmd2Low(CV_C, &node->AHUDev, CMD_WRITE, AirApp2Low);
+            SendCmd2Low(HV_C, &node->AHUDev, CMD_WRITE, AirApp2Low);
         }
         /* 刷新计时 */
         *tv_sec = t;
@@ -39,36 +39,36 @@ void AirCondTempAM(AppAirCondDev_l *node)
 }
 
 /* 开关模式湿度控制：根据预设和回风湿度判定是否打开加湿阀 */
-void AirCondHmdtSM(AppAirCondDev_l *node)
+void AirCondHmdtSM(AppAHUDev_l *node)
 {
     /* (目标湿度 - 回风湿度) > 1.0 : 就打开加湿阀 */
-    if(QueryDoubleValFromAirCondList(RM_HSP, &node->AirCondDev)
-       - QueryDoubleValFromAirCondList(RA_H, &node->AirCondDev)
+    if(QueryDoubleValFromAirCondList(RM_HSP, &node->AHUDev)
+       - QueryDoubleValFromAirCondList(RA_H, &node->AHUDev)
        > 1.0){
 
         /* open开关型加湿阀(没开才开) */
-        if(QueryIntValFromAirCondList(HUM_C, &node->AirCondDev) == 0){
-            ES_PRT_INFO("Enter Humidity-SwitchMode ctrl (open), deviceID=%d \n", node->AirCondDev.deviceID);
-            SETVAL_SENDCMD(HUM_C, 1, TypeOfVal_INT, &node->AirCondDev, CMD_WRITE, AirApp2Low);
+        if(QueryIntValFromAirCondList(HUM_C, &node->AHUDev) == 0){
+            ES_PRT_INFO("Enter Humidity-SwitchMode ctrl (open), deviceID=%d \n", node->AHUDev.deviceID);
+            SETVAL_SENDCMD(HUM_C, 1, TypeOfVal_INT, &node->AHUDev, CMD_WRITE, AirApp2Low);
         }
 
     }else{
         /* close开关型加湿阀(没关才关) */
-        if(QueryIntValFromAirCondList(HUM_C, &node->AirCondDev) == 1){
-            ES_PRT_INFO("Enter Humidity-SwitchMode ctrl (close), deviceID=%d \n", node->AirCondDev.deviceID);
-            SETVAL_SENDCMD(HUM_C, 0, TypeOfVal_INT, &node->AirCondDev, CMD_WRITE, AirApp2Low);
+        if(QueryIntValFromAirCondList(HUM_C, &node->AHUDev) == 1){
+            ES_PRT_INFO("Enter Humidity-SwitchMode ctrl (close), deviceID=%d \n", node->AHUDev.deviceID);
+            SETVAL_SENDCMD(HUM_C, 0, TypeOfVal_INT, &node->AHUDev, CMD_WRITE, AirApp2Low);
         }
     }
 }
 
 /* 调节模式湿度控制：PID */
-void AirCondHmdtAM(AppAirCondDev_l *node)
+void AirCondHmdtAM(AppAHUDev_l *node)
 {
-    long *tv_sec = &node->AirCondDev.PidSet.PidH.tv_sec;
+    long *tv_sec = &node->AHUDev.PidSet.PidH.tv_sec;
 
-    double *in = node->AirCondDev.PidSet.PidH.in;
-    double *out = node->AirCondDev.PidSet.PidH.out;
-    double *set = node->AirCondDev.PidSet.PidH.set;
+    double *in = node->AHUDev.PidSet.PidH.in;
+    double *out = node->AHUDev.PidSet.PidH.out;
+    double *set = node->AHUDev.PidSet.PidH.set;
 
     time_t t;
     time(&t);
@@ -78,10 +78,10 @@ void AirCondHmdtAM(AppAirCondDev_l *node)
         /* (设定湿度 - 回风湿度) 绝对值 > 1% 才进行控制 */
         // 死区在pid内部实现，此处在pid外部通过偏差实现，其实意义不大
         if( fabs(*set - *in) > 1.0 ){
-            pid_compute(&node->AirCondDev.PidSet.PidH.pid);
+            pid_compute(&node->AHUDev.PidSet.PidH.pid);
 
-            ES_PRT_INFO("Hmdt(deviceID=%d): pid out = %f in = %f set %f \n", node->AirCondDev.deviceID, *out, *in, *set);
-            SendCmd2Low(HUM_TC, &node->AirCondDev, CMD_WRITE, AirApp2Low);
+            ES_PRT_INFO("Hmdt(deviceID=%d): pid out = %f in = %f set %f \n", node->AHUDev.deviceID, *out, *in, *set);
+            SendCmd2Low(HUM_TC, &node->AHUDev, CMD_WRITE, AirApp2Low);
         }
         /* 刷新计时 */
         *tv_sec = t;
@@ -90,9 +90,9 @@ void AirCondHmdtAM(AppAirCondDev_l *node)
     
 }
 
-void PidInitHmdt(AppAirCondDev_l *node)
+void PidInitHmdt(AppAHUDev_l *node)
 {   
-    AppAirCondDev_t *Dev = &node->AirCondDev;
+    AppAHUDev_t *Dev = &node->AHUDev;
 
     Pid_t *PidH = &Dev->PidSet.PidH;
     /* 如果没有配置RA_H, HUM_TC, RM_HSP等点位，将返回NULL */
@@ -120,11 +120,11 @@ void PidInitHmdt(AppAirCondDev_l *node)
 
 }
 
-void PidInitTemp(AppAirCondDev_l *node)
+void PidInitTemp(AppAHUDev_l *node)
 {
-    AppAirCondDev_t *Dev = &node->AirCondDev;
+    AppAHUDev_t *Dev = &node->AHUDev;
 
-    if(QueryIntValFromAirCondList(WS_EX, &node->AirCondDev) == TRANSITION){
+    if(QueryIntValFromAirCondList(WS_EX, &node->AHUDev) == TRANSITION){
         ES_PRT_INFO(" Transitional season: no need to start Temperature-pid, deviceID(%d) \n",
                     Dev->deviceID);
         return;
@@ -157,9 +157,9 @@ void PidInitTemp(AppAirCondDev_l *node)
 
     Pid_Direction dirt;
 
-    if(QueryIntValFromAirCondList(WS_EX, &node->AirCondDev) == WINTER){
+    if(QueryIntValFromAirCondList(WS_EX, &node->AHUDev) == WINTER){
         dirt = PID_DIRECT;
-    }else if(QueryIntValFromAirCondList(WS_EX, &node->AirCondDev) == SUMMER){
+    }else if(QueryIntValFromAirCondList(WS_EX, &node->AHUDev) == SUMMER){
         dirt = PID_REVERSE;
     }
 
@@ -176,7 +176,7 @@ void PidInitTemp(AppAirCondDev_l *node)
 }
 
 
-void PidInitCO2(AppAirCondDev_l *node)
+void PidInitCO2(AppAHUDev_l *node)
 {
     
 }
